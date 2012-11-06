@@ -5,10 +5,9 @@ import requests
 
 
 def extract_message(msg):
-    regex = "\[\w+\]\ " #like [INFO]
-    msg = re.split(regex, msg)[-1]
-    return msg.replace("\n", "")
-
+    regex = "\d+\-\d+\-\d+ \d+\:\d+\:\d+ \[\d+\] \[\w+\] " #like 2012-11-06 18:30:10 [13887] [INFO]
+    msgs = re.split(regex, msg)
+    return [msg for msg in msgs if msg] #removing empty entries
 
 class Stream(object):
 
@@ -20,7 +19,7 @@ class Stream(object):
         appname = os.environ.get("APPNAME", None)
         if appname and host:
             url = "{0}/apps/{1}/log".format(host, appname)
-            messages = [extract_message(data["data"]),]
+            messages = extract_message(data["data"])
             requests.post(url, data=json.dumps(messages))
 
     def close(self):

@@ -27,7 +27,7 @@ class StreamTestCase(unittest.TestCase):
             post.return_value = mock.Mock(status_code=200)
             self.stream(self.data)
             url = "{0}/apps/{1}/log".format(host, appname)
-            expected_msg = "Starting gunicorn 0.15.0"
+            expected_msg = "Starting gunicorn 0.15.0\n"
             expected_data = json.dumps([expected_msg,])
             post.assert_called_with(url, data=expected_data)
 
