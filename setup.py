@@ -9,6 +9,7 @@ setup(name="tsuru-circus",
     author="timeredbull",
     author_email="timeredbull@corp.globo.com",
     include_package_data=True,
-    tests_require=("nose",),
+    install_requires=["requests",],
+    tests_require=["nose", "mock"],
     test_suite="nose.collector"
 )
