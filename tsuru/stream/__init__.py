@@ -1,3 +1,4 @@
+import os
 import requests
 
 
@@ -7,7 +8,10 @@ class Stream(object):
         pass
 
     def __call__(self, data):
-        requests.post("url", data=data)
+        host = os.environ["TSURU_HOST"]
+        appname = os.environ["APPNAME"]
+        url = "{0}/apps/{1}/log".format(host, appname)
+        requests.post(url, data=data)
 
     def close(self):
         pass
