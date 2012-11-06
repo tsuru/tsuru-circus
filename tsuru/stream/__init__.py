@@ -1,3 +1,4 @@
+import json
 import os
 import requests
 
@@ -12,7 +13,8 @@ class Stream(object):
         appname = os.environ.get("APPNAME", None)
         if appname and host:
             url = "{0}/apps/{1}/log".format(host, appname)
-            requests.post(url, data=data)
+            messages = [data["data"],]
+            requests.post(url, data=json.dumps(messages))
 
     def close(self):
         pass
