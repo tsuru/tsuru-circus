@@ -3,6 +3,10 @@ import os
 import requests
 
 
+def extract_message(msg):
+    return msg.replace("\n", "")
+
+
 class Stream(object):
 
     def __init__(self, **kwargs):
