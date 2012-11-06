@@ -20,7 +20,7 @@ class Stream(object):
         appname = os.environ.get("APPNAME", None)
         if appname and host:
             url = "{0}/apps/{1}/log".format(host, appname)
-            messages = [data["data"],]
+            messages = [extract_message(data["data"]),]
             requests.post(url, data=json.dumps(messages))
 
     def close(self):
