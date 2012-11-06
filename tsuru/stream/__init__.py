@@ -1,9 +1,12 @@
 import json
 import os
+import re
 import requests
 
 
 def extract_message(msg):
+    regex = "\[\w+\]\ " #like [INFO]
+    msg = re.split(regex, msg)[-1]
     return msg.replace("\n", "")
 
 
