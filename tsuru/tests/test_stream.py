@@ -20,3 +20,12 @@ class StreamTestCase(unittest.TestCase):
             stream("data")
             url = "{0}/apps/{1}/log".format(host, appname)
             post.assert_called_with(url, data="data")
+
+    def test_should_slience_errors_when_envs_does_not_exist(self):
+        del os.environ["TSURU_HOST"]
+        del os.environ["APPNAME"]
+        stream = Stream()
+        try:
+            stream("data")
+        except:
+            assert False
