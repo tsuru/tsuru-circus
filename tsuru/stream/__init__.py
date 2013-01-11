@@ -1,4 +1,4 @@
-# Copyright 2012 tsuru-circus authors. All rights reserved.
+# Copyright 2013 tsuru-circus authors. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
@@ -21,7 +21,7 @@ class Stream(object):
 
     def __call__(self, data):
         host = os.environ.get("TSURU_HOST", None)
-        appname = os.environ.get("APPNAME", None)
+        appname = os.environ.get("TSURU_APPNAME", None)
         if appname and host:
             url = "{0}/apps/{1}/log".format(host, appname)
             messages = extract_message(data["data"])

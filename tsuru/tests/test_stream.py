@@ -1,4 +1,4 @@
-# Copyright 2012 tsuru-circus authors. All rights reserved.
+# Copyright 2013 tsuru-circus authors. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
@@ -26,7 +26,7 @@ class StreamTestCase(unittest.TestCase):
         host = "http://someurl.com"
         appname = "myapp"
         os.environ["TSURU_HOST"] = host
-        os.environ["APPNAME"] = appname
+        os.environ["TSURU_APPNAME"] = appname
         with mock.patch("requests.post") as post:
             post.return_value = mock.Mock(status_code=200)
             self.stream(self.data)
@@ -37,7 +37,7 @@ class StreamTestCase(unittest.TestCase):
 
     def test_should_slience_errors_when_envs_does_not_exist(self):
         del os.environ["TSURU_HOST"]
-        del os.environ["APPNAME"]
+        del os.environ["TSURU_APPNAME"]
         try:
             self.stream(self.data)
         except:
