@@ -13,7 +13,7 @@ setup(name="tsuru-circus",
     author="timeredbull",
     author_email="timeredbull@corp.globo.com",
     include_package_data=True,
-    install_requires=["requests",],
+    install_requires=["requests","honcho==0.2.0"],
     tests_require=["nose", "mock"],
     test_suite="nose.collector"
 )
