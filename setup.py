@@ -6,7 +6,8 @@ from setuptools import setup, find_packages
 from tsuru import __version__
 
 
-setup(name="tsuru-circus",
+setup(
+    name="tsuru-circus",
     version=__version__,
     packages=find_packages(),
     description="Circus extensions for tsuru.",
