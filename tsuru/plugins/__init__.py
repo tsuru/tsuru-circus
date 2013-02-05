@@ -39,7 +39,13 @@ class ProcfileWatcher(CircusPlugin):
         if os.path.exists(self.procfile_path):
             with open(self.procfile_path) as file:
                 procfile = Procfile(file.read())
-                commands = self.call("status")["statuses"].keys()
-                for name, cmd in procfile.commands.items():
-                    if name not in commands:
-                        self.add_watcher(name=name, cmd=cmd)
+                cmds = set(self.call("status")["statuses"].keys())
+                new_cmds = set(procfile.commands.keys())
+                to_remove = cmds.difference(new_cmds)
+                to_add = new_cmds.difference(cmds)
+
+                for name in to_remove:
+                    self.remove_watcher(name)
+
+                for name in to_add:
+                    self.add_watcher(name=name, cmd=procfile.commands[name])
