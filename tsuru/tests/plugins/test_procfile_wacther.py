@@ -3,6 +3,8 @@ from mock import Mock
 
 from tsuru.plugins import ProcfileWatcher
 
+from honcho.procfile import Procfile
+
 
 class ProcfileWatcherTest(TestCase):
     def test_add_watcher(self):
@@ -29,6 +31,6 @@ class ProcfileWatcherTest(TestCase):
         result = Mock()
         result.return_value = {"statuses": {}}
         plugin.call = result
-        procfile = "'web: gunicorn -b 0.0.0.0:8080 abyss.wsgi\n'"
+        procfile = Procfile('web: gunicorn -b 0.0.0.0:8080 abyss.wsgi\n')
         to_add, to_remove = plugin.commands(procfile)
         plugin.call.assert_called_with("status")
