@@ -1,5 +1,6 @@
 from unittest import TestCase
 from mock import Mock
+import json
 
 from tsuru.plugins import ProcfileWatcher
 
@@ -9,15 +10,20 @@ from honcho.procfile import Procfile
 class ProcfileWatcherTest(TestCase):
     def test_add_watcher(self):
         plugin = ProcfileWatcher("", "", 1)
-        plugin.call = Mock()
-        options = {
-            "cmd": "ls",
-            "name": "name",
+        plugin.client= Mock()
+        name = "name"
+        cmd = "cmd"
+        options = json.dumps({
+            "command": "add",
+            "properties": {
+            "cmd":  cmd,
+            "name": name,
+            "args": [],
+            "options": {"shell": True},
             "start": True,
-            "copy_env": True,
-        }
-        plugin.add_watcher(name=options["name"], cmd=options["cmd"])
-        plugin.call.assert_called_with("add", **options)
+        }})
+        plugin.add_watcher(name=name, cmd=cmd)
+        plugin.client.call.assert_called_with(options)
 
     def test_remove_watcher(self):
         plugin = ProcfileWatcher("", "", 1)

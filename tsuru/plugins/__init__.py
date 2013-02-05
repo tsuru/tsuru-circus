@@ -1,8 +1,10 @@
 from circus.plugins import CircusPlugin
+from circus.client import CircusClient
 from zmq.eventloop import ioloop
 from honcho.procfile import Procfile
 
 import os.path
+import json
 
 
 class ProcfileWatcher(CircusPlugin):
@@ -13,6 +15,7 @@ class ProcfileWatcher(CircusPlugin):
         self.loop_rate = config.get("loop_rate", 1)  # in seconds
         self.procfile_path = config.get("app_path", "/home/application/current/Procfile")
         self.period = ioloop.PeriodicCallback(self.look_after, self.loop_rate * 1000, self.loop)
+        self.client = CircusClient()
 
     def handle_init(self):
         self.period.start()
@@ -25,12 +28,17 @@ class ProcfileWatcher(CircusPlugin):
 
     def add_watcher(self, name, cmd):
         options = {
-            "name": name,
-            "cmd": cmd,
-            "start": True,
-            "copy_env": True,
+            "shell": True,
         }
-        self.call("add", **options)
+        self.client.call(json.dumps({
+            "command": "add",
+            "properties": {
+            "cmd":  cmd,
+            "name": name,
+            "args": [],
+            "options": options,
+            "start": True,
+        }}))
 
     def remove_watcher(self, name):
         self.call("rm", name=name)
