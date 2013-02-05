@@ -10,7 +10,7 @@ class ProcfileWatcher(CircusPlugin):
 
     def __init__(self, *args, **config):
         super(ProcfileWatcher, self).__init__(*args, **config)
-        self.loop_rate = config.get("loop_rate", 10)  # in seconds
+        self.loop_rate = config.get("loop_rate", 1)  # in seconds
         self.procfile_path = config.get("app_path", "/home/application/current/Procfile")
         self.period = ioloop.PeriodicCallback(self.look_after, self.loop_rate * 1000, self.loop)
 
@@ -27,3 +27,7 @@ class ProcfileWatcher(CircusPlugin):
         if os.path.exists(self.procfile_path):
             with open(self.procfile_path) as file:
                 procfile = Procfile(file.read())
+                commands = self.call("status")["statuses"].keys()
+                for name, cmd in procfile.commands.items():
+                    if name not in commands:
+                        self.call("add", name=name, cmd=cmd, start=True)
