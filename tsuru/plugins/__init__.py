@@ -27,6 +27,7 @@ class ProcfileWatcher(CircusPlugin):
         options = {
             "name": name,
             "cmd": cmd,
+            "start": True,
         }
         self.call("add", **options)
 

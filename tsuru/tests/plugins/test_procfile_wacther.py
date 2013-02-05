@@ -11,6 +11,7 @@ class ProcfileWatcherTest(TestCase):
         options = {
             "cmd": "ls",
             "name": "name",
+            "start": True,
         }
         plugin.add_watcher(name=options["name"], cmd=options["cmd"])
         plugin.call.assert_called_with("add", **options)
