@@ -14,3 +14,10 @@ class ProcfileWatcherTest(TestCase):
         }
         plugin.add_watcher(name=options["name"], cmd=options["cmd"])
         plugin.call.assert_called_with("add", **options)
+
+    def test_remove_watcher(self):
+        plugin = ProcfileWatcher("", "", 1)
+        plugin.call = Mock()
+        name = "name"
+        plugin.remove_watcher(name=name)
+        plugin.call.assert_called_with("rm", name=name)

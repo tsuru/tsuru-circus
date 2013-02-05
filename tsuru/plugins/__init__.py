@@ -30,6 +30,9 @@ class ProcfileWatcher(CircusPlugin):
         }
         self.call("add", **options)
 
+    def remove_watcher(self, name):
+        self.call("rm", name=name)
+
     def look_after(self):
         if os.path.exists(self.procfile_path):
             with open(self.procfile_path) as file:
