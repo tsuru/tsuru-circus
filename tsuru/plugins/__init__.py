@@ -23,7 +23,7 @@ class ProcfileWatcher(CircusPlugin):
     def handle_recv(self, data):
         pass
 
-    def add_command(self, name, cmd):
+    def add_watcher(self, name, cmd):
         options = {
             "name": name,
             "cmd": cmd,
@@ -37,4 +37,4 @@ class ProcfileWatcher(CircusPlugin):
                 commands = self.call("status")["statuses"].keys()
                 for name, cmd in procfile.commands.items():
                     if name not in commands:
-                        self.add_command(name=name, cmd=cmd)
+                        self.add_watcher(name=name, cmd=cmd)
