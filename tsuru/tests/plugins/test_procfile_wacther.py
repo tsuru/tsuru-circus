@@ -23,3 +23,12 @@ class ProcfileWatcherTest(TestCase):
         name = "name"
         plugin.remove_watcher(name=name)
         plugin.call.assert_called_with("rm", name=name)
+
+    def test_commands(self):
+        plugin = ProcfileWatcher("", "", 1)
+        result = Mock()
+        result.return_value = {"statuses": {}}
+        plugin.call = result
+        procfile = "'web: gunicorn -b 0.0.0.0:8080 abyss.wsgi\n'"
+        to_add, to_remove = plugin.commands(procfile)
+        plugin.call.assert_called_with("status")
