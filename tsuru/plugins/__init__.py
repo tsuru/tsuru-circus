@@ -28,6 +28,7 @@ class ProcfileWatcher(CircusPlugin):
             "name": name,
             "cmd": cmd,
             "start": True,
+            "copy_env": True,
         }
         self.call("add", **options)
 
