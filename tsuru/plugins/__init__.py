@@ -19,7 +19,7 @@ class ProcfileWatcher(CircusPlugin):
         self.loop_rate = config.get("loop_rate", 60)  # in seconds
         self.procfile_path = config.get("app_path", "/home/application/current/Procfile")
         self.period = ioloop.PeriodicCallback(self.look_after, self.loop_rate * 1000, self.loop)
-        self.client = CircusClient()
+        self.circus_client = CircusClient()
 
     def handle_init(self):
         self.period.start()
@@ -37,7 +37,7 @@ class ProcfileWatcher(CircusPlugin):
             "stderr_stream": {"class": "tsuru.stream.Stream"},
             "stdout_stream": {"class": "tsuru.stream.Stream"},
         }
-        self.client.call(json.dumps({
+        self.circus_client.call(json.dumps({
             "command": "add",
             "properties": {
             "cmd":  cmd,
