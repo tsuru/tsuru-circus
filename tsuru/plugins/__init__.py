@@ -32,6 +32,7 @@ class ProcfileWatcher(CircusPlugin):
             "shell": True,
             "working_dir": "/home/application/current",
             "stderr_stream": {"class": "tsuru.stream.Stream"},
+            "stdout_stream": {"class": "tsuru.stream.Stream"},
         }
         self.client.call(json.dumps({
             "command": "add",
