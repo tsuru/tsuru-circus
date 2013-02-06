@@ -16,9 +16,8 @@ class ProcfileWatcher(CircusPlugin):
 
     def __init__(self, *args, **config):
         super(ProcfileWatcher, self).__init__(*args, **config)
-        self.loop_rate = config.get("loop_rate", 1)  # in seconds
+        self.loop_rate = config.get("loop_rate", 60)  # in seconds
         self.procfile_path = config.get("app_path", "/home/application/current/Procfile")
-        self.procfile_path = config.get("app_path", "/Users/andrews/projetos/cloud/abyss/Procfile")
         self.period = ioloop.PeriodicCallback(self.look_after, self.loop_rate * 1000, self.loop)
         self.client = CircusClient()
 
