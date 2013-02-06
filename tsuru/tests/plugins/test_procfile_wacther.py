@@ -22,6 +22,7 @@ class ProcfileWatcherTest(TestCase):
             "options": {
                 "shell": True,
                 "working_dir": "/home/application/current",
+                "stderr_stream": {"class": "tsuru.stream.Stream"},
             },
             "start": True,
         }})
