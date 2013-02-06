@@ -19,7 +19,10 @@ class ProcfileWatcherTest(TestCase):
             "cmd":  cmd,
             "name": name,
             "args": [],
-            "options": {"shell": True},
+            "options": {
+                "shell": True,
+                "working_dir": "/home/application/current",
+            },
             "start": True,
         }})
         plugin.add_watcher(name=name, cmd=cmd)
