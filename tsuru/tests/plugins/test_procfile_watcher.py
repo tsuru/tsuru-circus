@@ -24,7 +24,7 @@ class ProcfileWatcherTest(TestCase):
             "name": name,
             "args": [],
             "options": {
-                "shell": True,
+                "copy_env": True,
                 "working_dir": "/home/application/current",
                 "stderr_stream": {"class": "tsuru.stream.Stream"},
                 "stdout_stream": {"class": "tsuru.stream.Stream"},

@@ -7,8 +7,8 @@ from circus.client import CircusClient
 from zmq.eventloop import ioloop
 from honcho.procfile import Procfile
 
-import os.path
 import json
+import os
 
 
 class ProcfileWatcher(CircusPlugin):
@@ -32,7 +32,7 @@ class ProcfileWatcher(CircusPlugin):
 
     def add_watcher(self, name, cmd):
         options = {
-            "shell": True,
+            "copy_env": True,
             "working_dir": "/home/application/current",
             "stderr_stream": {"class": "tsuru.stream.Stream"},
             "stdout_stream": {"class": "tsuru.stream.Stream"},
