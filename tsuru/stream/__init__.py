@@ -16,14 +16,13 @@ def extract_message(msg):
 
 class Stream(object):
 
-    def __init__(self, **kwargs):
-        pass
+    def __init__(self, tsuru_host=None, tsuru_appname=None, **kwargs):
+        self.tsuru_host = tsuru_host
+        self.tsuru_appname = tsuru_appname
 
     def __call__(self, data):
-        host = os.environ.get("TSURU_HOST", None)
-        appname = os.environ.get("TSURU_APPNAME", None)
-        if appname and host:
-            url = "{0}/apps/{1}/log".format(host, appname)
+        if self.tsuru_appname and self.tsuru_host:
+            url = "{0}/apps/{1}/log".format(self.tsuru_host, self.tsuru_appname)
             messages = extract_message(data["data"])
             requests.post(url, data=json.dumps(messages))
 
