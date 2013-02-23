@@ -5,6 +5,7 @@
 from unittest import TestCase
 from mock import Mock
 import json
+import os.path
 
 from tsuru.plugins import ProcfileWatcher
 
@@ -14,6 +15,7 @@ from honcho.procfile import Procfile
 class ProcfileWatcherTest(TestCase):
     def test_add_watcher(self):
         plugin = ProcfileWatcher("", "", 1)
+        plugin.envs = lambda: {}
         plugin.circus_client = Mock()
         name = "name"
         cmd = "cmd"
@@ -51,3 +53,13 @@ class ProcfileWatcherTest(TestCase):
         procfile = Procfile('web: gunicorn -b 0.0.0.0:8080 abyss.wsgi\n')
         to_add, to_remove = plugin.commands(procfile)
         plugin.call.assert_called_with("status")
+
+    def test_envs(self):
+        plugin = ProcfileWatcher("", "", 1)
+        plugin.apprc = os.path.join(os.path.dirname(__file__), "testdata/apprc")
+        envs = plugin.envs()
+        expected = {
+            "VAR1": "value-1",
+            "VAR2": "value2",
+        }
+        self.assertDictEqual(expected, envs)
