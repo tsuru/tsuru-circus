@@ -16,15 +16,30 @@ def extract_message(msg):
 
 class Stream(object):
 
-    def __init__(self, tsuru_host=None, tsuru_appname=None, **kwargs):
-        self.tsuru_host = tsuru_host
-        self.tsuru_appname = tsuru_appname
+    def __init__(self, **kwargs):
+        self.apprc = "/home/application/apprc"
 
     def __call__(self, data):
-        if self.tsuru_appname and self.tsuru_host:
-            url = "{0}/apps/{1}/log".format(self.tsuru_host, self.tsuru_appname)
+        tsuru_appname, tsuru_host = self.appname_and_host()
+        if tsuru_appname and tsuru_host:
+            url = "{0}/apps/{1}/log".format(tsuru_host, tsuru_appname)
             messages = extract_message(data["data"])
             requests.post(url, data=json.dumps(messages))
+
+    def appname_and_host(self):
+        envs = self.load_envs()
+        return envs.get("TSURU_APPNAME"), envs.get("TSURU_HOST")
+
+    def load_envs(self):
+        envs = {}
+        with open(self.apprc) as file:
+            for line in file.readlines():
+                if "export" in line:
+                    line = line.replace("export ", "")
+                    k, v = line.split("=")
+                    v = v.replace("\n", "").replace('"', '')
+                    envs[k] = v
+        return envs
 
     def close(self):
         pass
