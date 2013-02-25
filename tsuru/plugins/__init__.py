@@ -68,24 +68,17 @@ class ProcfileWatcher(CircusPlugin):
             "start": True,
         }}))
 
-    def remove_watcher(self, name):
-        self.call("rm", name=name)
-
-    def commands(self, procfile):
-        cmds = set(self.call("status")["statuses"].keys())
-        new_cmds = set(procfile.commands.keys())
-        to_remove = cmds.difference(new_cmds)
-        to_add = new_cmds.difference(cmds)
-        return to_add, to_remove
+    def remove_watchers(self):
+        for cmd in self.call("status")["statuses"].keys():
+            self.call("rm", name=cmd)
 
     def look_after(self):
         if os.path.exists(self.procfile_path):
             with open(self.procfile_path) as file:
+                self.remove_watchers()
+
                 procfile = Procfile(file.read())
-                to_add, to_remove = self.commands(procfile)
+                cmds = self.commands(procfile)
 
-                for name in to_remove:
-                    self.remove_watcher(name)
-
-                for name in to_add:
+                for name in procfile.commands.keys():
                     self.add_watcher(name=name, cmd=procfile.commands[name])
