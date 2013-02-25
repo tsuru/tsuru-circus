@@ -78,7 +78,6 @@ class ProcfileWatcher(CircusPlugin):
                 self.remove_watchers()
 
                 procfile = Procfile(file.read())
-                cmds = self.commands(procfile)
 
                 for name in procfile.commands.keys():
                     self.add_watcher(name=name, cmd=procfile.commands[name])
