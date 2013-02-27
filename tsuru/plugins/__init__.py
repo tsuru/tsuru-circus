@@ -15,22 +15,45 @@ class ApprcWatcher(CircusPlugin):
     name = "apprc_watcher"
 
     def __init__(self, *args, **config):
-        pass
+        super(ApprcWatcher, self).__init__(*args, **config)
+        self.loop_rate = config.get("loop_rate", 10)  # in seconds
+        self.apprc = config.get("apprc", "/home/application/apprc")
+        self.port = config.get("port", "8888")
+        self.period = ioloop.PeriodicCallback(self.look_after, self.loop_rate * 1000, self.loop)
 
     def handle_init(self):
-        pass
+        self.period.start()
 
     def handle_stop(self):
-        pass
+        self.period.stop()
 
     def handle_recv(self, data):
         pass
 
     def look_after(self):
-        pass
+        if os.path.exists(self.apprc):
+            with open(self.apprc) as file:
+                envs = {"port": self.port}
+                envs.update(self.envs())
+                for name in self.cmds():
+                    self.add_envs(name, envs)
 
     def add_envs(self, name, envs):
         self.call("set", name=name, options={"env": envs})
+
+    def envs(self):
+        environs = {}
+        with open(self.apprc) as file:
+            for line in file.readlines():
+                if "export" in line:
+                    line = line.replace("export ", "")
+                    k, v = line.split("=")
+                    v = v.replace("\n", "").replace('"', '')
+                    environs[k] = v
+        return environs
+
+    def cmds(self):
+        return self.call("status")["statuses"].keys()
 
 
 class ProcfileWatcher(CircusPlugin):
