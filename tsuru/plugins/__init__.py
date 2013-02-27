@@ -113,7 +113,7 @@ class ProcfileWatcher(CircusPlugin):
             "options": options,
             "start": True,
         }}))
-        self.cmds["name"] = cmd
+        self.cmds[name] = cmd
 
     def remove_watcher(self, name):
         self.call("rm", name=name)
