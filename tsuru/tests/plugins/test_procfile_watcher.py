@@ -37,6 +37,7 @@ class ProcfileWatcherTest(TestCase):
         }})
         plugin.add_watcher(name=name, cmd=cmd)
         plugin.circus_client.call.assert_called_with(options)
+        self.assertDictEqual({name: cmd}, plugin.cmds)
 
     def test_remove_watcher(self):
         plugin = ProcfileWatcher("", "", 1)

@@ -71,6 +71,7 @@ class ProcfileWatcher(CircusPlugin):
         self.stdout_stream = {"class": config.get("stdout_stream", "tsuru.stream.Stream")}
         self.period = ioloop.PeriodicCallback(self.look_after, self.loop_rate * 1000, self.loop)
         self.circus_client = CircusClient()
+        self.cmds = {}
 
     def envs(self):
         environs = {}
@@ -112,6 +113,7 @@ class ProcfileWatcher(CircusPlugin):
             "options": options,
             "start": True,
         }}))
+        self.cmds["name"] = cmd
 
     def remove_watcher(self, name):
         self.call("rm", name=name)
