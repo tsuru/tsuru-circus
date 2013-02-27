@@ -11,6 +11,28 @@ import json
 import os
 
 
+class ApprcWatcher(CircusPlugin):
+    name = "apprc_watcher"
+
+    def __init__(self, *args, **config):
+        pass
+
+    def handle_init(self):
+        pass
+
+    def handle_stop(self):
+        pass
+
+    def handle_recv(self, data):
+        pass
+
+    def look_after(self):
+        pass
+
+    def add_envs(self, name, envs):
+        self.call("set", name=name, options={"env": envs})
+
+
 class ProcfileWatcher(CircusPlugin):
     name = "procfile_watcher"
 
