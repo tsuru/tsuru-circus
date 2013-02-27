@@ -104,4 +104,4 @@ class ProcfileWatcherTest(TestCase):
         plugin.call.return_value = {"statuses": {"name":"name", "cmd":"cmd"}}
         plugin.procfile_path = os.path.join(os.path.dirname(__file__), "testdata/Procfile3")
         plugin.look_after()
-        plugin.call.assert_called_with("set", name="name", cmd="cmd2")
+        plugin.call.assert_called_with("set", name="name", options={'cmd': 'cmd2'})

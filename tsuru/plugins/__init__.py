@@ -72,7 +72,7 @@ class ProcfileWatcher(CircusPlugin):
         self.call("rm", name=name)
 
     def change_cmd(self, name, cmd):
-        self.call("set", name=name, cmd=cmd)
+        self.call("set", name=name, options={"cmd": cmd})
 
     def commands(self, procfile):
         cmds = self.call("status")["statuses"]
