@@ -16,7 +16,7 @@ class ProcfileWatcher(CircusPlugin):
 
     def __init__(self, *args, **config):
         super(ProcfileWatcher, self).__init__(*args, **config)
-        self.loop_rate = config.get("loop_rate", 60)  # in seconds
+        self.loop_rate = config.get("loop_rate", 10)  # in seconds
         self.procfile_path = config.get("app_path", "/home/application/current/Procfile")
         self.working_dir = config.get("working_dir", "/home/application/current")
         self.apprc = config.get("apprc", "/home/application/apprc")
@@ -68,16 +68,35 @@ class ProcfileWatcher(CircusPlugin):
             "start": True,
         }}))
 
-    def remove_watchers(self):
-        for cmd in self.call("status")["statuses"].keys():
-            self.call("rm", name=cmd)
+    def remove_watcher(self, name):
+        self.call("rm", name=name)
+
+    def change_cmd(self, name, cmd):
+        self.call("set", name=name, cmd=cmd)
+
+    def commands(self, procfile):
+        cmds = self.call("status")["statuses"]
+        cmds_names = set(cmds.keys())
+        new_cmds = set(procfile.commands.keys())
+        to_remove = cmds_names.difference(new_cmds)
+        to_add = new_cmds.difference(cmds_names)
+        to_change_names = cmds_names.intersection(new_cmds)
+        to_change = {}
+        for name in to_change_names:
+            to_change[name] = cmds[name]
+        return to_add, to_remove, to_change
 
     def look_after(self):
         if os.path.exists(self.procfile_path):
             with open(self.procfile_path) as file:
-                self.remove_watchers()
-
                 procfile = Procfile(file.read())
+                to_add, to_remove, to_change = self.commands(procfile)
 
-                for name in procfile.commands.keys():
+                for name in to_remove:
+                    self.remove_watcher(name)
+
+                for name in to_add:
                     self.add_watcher(name=name, cmd=procfile.commands[name])
+
+                for name, cmd in to_change.items():
+                    self.change_cmd(name=name, cmd=procfile.commands[name])
