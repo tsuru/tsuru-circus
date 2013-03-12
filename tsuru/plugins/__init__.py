@@ -19,7 +19,9 @@ class ApprcWatcher(CircusPlugin):
         self.loop_rate = config.get("loop_rate", 10)  # in seconds
         self.apprc = config.get("apprc", "/home/application/apprc")
         self.port = config.get("port", "8888")
-        self.period = ioloop.PeriodicCallback(self.look_after, self.loop_rate * 1000, self.loop)
+        self.period = ioloop.PeriodicCallback(self.look_after,
+                                              self.loop_rate * 1000,
+                                              self.loop)
 
     def handle_init(self):
         self.period.start()
@@ -32,11 +34,10 @@ class ApprcWatcher(CircusPlugin):
 
     def look_after(self):
         if os.path.exists(self.apprc):
-            with open(self.apprc) as file:
-                envs = {"port": self.port}
-                envs.update(self.envs())
-                for name in self.cmds():
-                    self.add_envs(name, envs)
+            envs = {"port": self.port}
+            envs.update(self.envs())
+            for name in self.cmds():
+                self.add_envs(name, envs)
 
     def add_envs(self, name, envs):
         self.call("set", name=name, options={"env": envs})
@@ -62,14 +63,20 @@ class ProcfileWatcher(CircusPlugin):
     def __init__(self, *args, **config):
         super(ProcfileWatcher, self).__init__(*args, **config)
         self.loop_rate = config.get("loop_rate", 10)  # in seconds
-        self.procfile_path = config.get("app_path", "/home/application/current/Procfile")
-        self.working_dir = config.get("working_dir", "/home/application/current")
+        self.procfile_path = config.get("app_path",
+                                        "/home/application/current/Procfile")
+        self.working_dir = config.get("working_dir",
+                                      "/home/application/current")
         self.apprc = config.get("apprc", "/home/application/apprc")
         self.port = config.get("port", "8888")
         self.uid = config.get("uid", "ubuntu")
-        self.stderr_stream = {"class": config.get("stderr_stream", "tsuru.stream.Stream")}
-        self.stdout_stream = {"class": config.get("stdout_stream", "tsuru.stream.Stream")}
-        self.period = ioloop.PeriodicCallback(self.look_after, self.loop_rate * 1000, self.loop)
+        self.stderr_stream = {"class": config.get("stderr_stream",
+                                                  "tsuru.stream.Stream")}
+        self.stdout_stream = {"class": config.get("stdout_stream",
+                                                  "tsuru.stream.Stream")}
+        self.period = ioloop.PeriodicCallback(self.look_after,
+                                              self.loop_rate * 1000,
+                                              self.loop)
         self.circus_client = CircusClient()
         self.cmds = {}
 
@@ -107,12 +114,13 @@ class ProcfileWatcher(CircusPlugin):
         self.circus_client.call(json.dumps({
             "command": "add",
             "properties": {
-            "cmd":  cmd,
-            "name": name,
-            "args": [],
-            "options": options,
-            "start": True,
-        }}))
+                "cmd": cmd,
+                "name": name,
+                "args": [],
+                "options": options,
+                "start": True,
+            },
+        }))
         self.cmds[name] = cmd
 
     def remove_watcher(self, name):

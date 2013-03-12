@@ -1,6 +1,10 @@
 language: python
+before_script:
+  - pip install flake8
 script:
   - python setup.py test
+  - git clean -dfx
+  - flake8 --ignore=E501 .
 notifications:
   irc:
     channels:

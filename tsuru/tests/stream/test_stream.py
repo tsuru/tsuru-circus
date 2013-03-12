@@ -12,13 +12,15 @@ from tsuru.stream import Stream
 
 class StreamTestCase(unittest.TestCase):
     def setUp(self):
+        l = '2012-11-06 17:13:55 [12019] [INFO] Starting gunicorn 0.15.0\n'
         self.data = {
             'pid': 12018,
-            'data': '2012-11-06 17:13:55 [12019] [INFO] Starting gunicorn 0.15.0\n',
+            'data': l,
             'name': 'stderr'
         }
         self.stream = Stream()
-        self.stream.apprc = os.path.join(os.path.dirname(__file__), "testdata/apprc")
+        self.stream.apprc = os.path.join(os.path.dirname(__file__),
+                                         "testdata/apprc")
 
     def test_should_have_the_close_method(self):
         self.assertTrue(hasattr(Stream, "close"))
@@ -30,7 +32,7 @@ class StreamTestCase(unittest.TestCase):
             appname, host = self.stream.appname_and_host()
             url = "{0}/apps/{1}/log".format(host, appname)
             expected_msg = "Starting gunicorn 0.15.0\n"
-            expected_data = json.dumps([expected_msg,])
+            expected_data = json.dumps([expected_msg])
             post.assert_called_with(url, data=expected_data)
 
     def test_should_slience_errors_when_envs_does_not_exist(self):

@@ -22,19 +22,20 @@ class ProcfileWatcherTest(TestCase):
         options = json.dumps({
             "command": "add",
             "properties": {
-            "cmd":  cmd,
-            "name": name,
-            "args": [],
-            "options": {
-                "env": {"port": "8888"},
-                "copy_env": True,
-                "working_dir": "/home/application/current",
-                "stderr_stream": {"class": "tsuru.stream.Stream"},
-                "stdout_stream": {"class": "tsuru.stream.Stream"},
-                "uid": "ubuntu",
+                "cmd": cmd,
+                "name": name,
+                "args": [],
+                "options": {
+                    "env": {"port": "8888"},
+                    "copy_env": True,
+                    "working_dir": "/home/application/current",
+                    "stderr_stream": {"class": "tsuru.stream.Stream"},
+                    "stdout_stream": {"class": "tsuru.stream.Stream"},
+                    "uid": "ubuntu",
+                },
+                "start": True,
             },
-            "start": True,
-        }})
+        })
         plugin.add_watcher(name=name, cmd=cmd)
         plugin.circus_client.call.assert_called_with(options)
         self.assertDictEqual({name: cmd}, plugin.cmds)
@@ -57,7 +58,8 @@ class ProcfileWatcherTest(TestCase):
 
     def test_envs(self):
         plugin = ProcfileWatcher("", "", 1)
-        plugin.apprc = os.path.join(os.path.dirname(__file__), "testdata/apprc")
+        plugin.apprc = os.path.join(os.path.dirname(__file__),
+                                    "testdata/apprc")
         envs = plugin.envs()
         expected = {
             "VAR1": "value-1",
@@ -67,7 +69,8 @@ class ProcfileWatcherTest(TestCase):
 
     def test_look_after_add_new_cmds(self):
         plugin = ProcfileWatcher("", "", 1)
-        plugin.procfile_path = os.path.join(os.path.dirname(__file__), "testdata/Procfile1")
+        plugin.procfile_path = os.path.join(os.path.dirname(__file__),
+                                            "testdata/Procfile1")
         plugin.circus_client = Mock()
         plugin.envs = lambda: {}
         plugin.call = Mock()
@@ -76,33 +79,38 @@ class ProcfileWatcherTest(TestCase):
         options = json.dumps({
             "command": "add",
             "properties": {
-            "cmd": "cmd",
-            "name": "name",
-            "args": [],
-            "options": {
-                "env": {"port": "8888"},
-                "copy_env": True,
-                "working_dir": "/home/application/current",
-                "stderr_stream": {"class": "tsuru.stream.Stream"},
-                "stdout_stream": {"class": "tsuru.stream.Stream"},
-                "uid": "ubuntu",
+                "cmd": "cmd",
+                "name": "name",
+                "args": [],
+                "options": {
+                    "env": {"port": "8888"},
+                    "copy_env": True,
+                    "working_dir": "/home/application/current",
+                    "stderr_stream": {"class": "tsuru.stream.Stream"},
+                    "stdout_stream": {"class": "tsuru.stream.Stream"},
+                    "uid": "ubuntu",
+                },
+                "start": True,
             },
-            "start": True,
-        }})
+        })
         plugin.circus_client.call.assert_called_with(options)
 
     def test_look_after_remove_old_cmds(self):
         plugin = ProcfileWatcher("", "", 1)
         plugin.call = Mock()
-        plugin.call.return_value = {"statuses": {"name":"name", "cmd":"cmd"}}
-        plugin.procfile_path = os.path.join(os.path.dirname(__file__), "testdata/Procfile2")
+        plugin.call.return_value = {"statuses": {"name": "name", "cmd": "cmd"}}
+        plugin.procfile_path = os.path.join(os.path.dirname(__file__),
+                                            "testdata/Procfile2")
         plugin.look_after()
         plugin.call.assert_called_with("rm", name="name")
 
     def test_look_after_update_cmds(self):
         plugin = ProcfileWatcher("", "", 1)
         plugin.call = Mock()
-        plugin.call.return_value = {"statuses": {"name":"name", "cmd":"cmd"}}
-        plugin.procfile_path = os.path.join(os.path.dirname(__file__), "testdata/Procfile3")
+        plugin.call.return_value = {"statuses": {"name": "name", "cmd": "cmd"}}
+        plugin.procfile_path = os.path.join(os.path.dirname(__file__),
+                                            "testdata/Procfile3")
         plugin.look_after()
-        plugin.call.assert_called_with("set", name="name", options={'cmd': 'cmd2'})
+        plugin.call.assert_called_with("set",
+                                       name="name",
+                                       options={'cmd': 'cmd2'})
