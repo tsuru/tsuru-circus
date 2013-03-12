@@ -7,6 +7,7 @@ from circus.client import CircusClient
 from zmq.eventloop import ioloop
 from honcho.procfile import Procfile
 
+import copy
 import json
 import os
 
@@ -41,6 +42,11 @@ class ApprcWatcher(CircusPlugin):
                     self.add_envs(name, envs)
 
     def add_envs(self, name, envs):
+        current = self.call("options", name=name)["env"]
+        path = current.get("PATH")
+        if path and "PATH" not in envs:
+            envs = copy.deepcopy(envs)
+            envs["PATH"] = path
         self.call("set", name=name, options={"env": envs})
 
     def restart(self, name):
