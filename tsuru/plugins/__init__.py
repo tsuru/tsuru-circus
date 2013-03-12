@@ -37,10 +37,14 @@ class ApprcWatcher(CircusPlugin):
             envs = {"port": self.port}
             envs.update(self.envs())
             for name in self.cmds():
-                self.add_envs(name, envs)
+                if not name.startswith("plugin:"):
+                    self.add_envs(name, envs)
 
     def add_envs(self, name, envs):
         self.call("set", name=name, options={"env": envs})
+
+    def restart(self, name):
+        pass
 
     def envs(self):
         environs = {}
