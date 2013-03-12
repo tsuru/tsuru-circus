@@ -42,7 +42,7 @@ class ApprcWatcher(CircusPlugin):
                     self.add_envs(name, envs)
 
     def add_envs(self, name, envs):
-        current = self.call("options", name=name)["env"]
+        current = self.call("options", name=name)["options"]["env"]
         path = current.get("PATH")
         if path and "PATH" not in envs:
             envs = copy.deepcopy(envs)

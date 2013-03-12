@@ -8,16 +8,22 @@ import os
 from tsuru.plugins import ApprcWatcher
 
 PATH_OUTPUT = {
-    "max_retry": 5,
-    "env": {
-        "PATH": "/usr/bin:/bin:/sbin",
-        "SOMETHING": "adios",
+    "status": "ok",
+    "options": {
+        "max_retry": 5,
+        "env": {
+            "PATH": "/usr/bin:/bin:/sbin",
+            "SOMETHING": "adios",
+        },
     },
 }
 
 NOPATH_OUTPUT = {
-    "max_retry": 5,
-    "env": {"SOMETHING": "adios"},
+    "status": "ok",
+    "options": {
+        "max_retry": 5,
+        "env": {"SOMETHING": "adios"},
+    },
 }
 
 
@@ -52,7 +58,7 @@ class ApprcWatcherTest(TestCase):
         expected = [
             {"name": "name",
              "options": {"env": {"foo": "bar",
-                                 "PATH": PATH_OUTPUT["env"]["PATH"]}}},
+                                 "PATH": PATH_OUTPUT["options"]["env"]["PATH"]}}},
         ]
         self.assertEqual(expected, kw)
 
