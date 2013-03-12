@@ -109,6 +109,7 @@ class ProcfileWatcher(CircusPlugin):
         pass
 
     def add_watcher(self, name, cmd):
+        self.cmds[name] = cmd
         env = {"port": self.port}
         env.update(self.envs())
         options = {
@@ -129,7 +130,6 @@ class ProcfileWatcher(CircusPlugin):
                 "start": True,
             },
         }))
-        self.cmds[name] = cmd
 
     def remove_watcher(self, name):
         self.call("rm", name=name)
