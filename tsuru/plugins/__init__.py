@@ -49,9 +49,6 @@ class ApprcWatcher(CircusPlugin):
             envs["PATH"] = path
         self.call("set", name=name, options={"env": envs})
 
-    def restart(self, name):
-        pass
-
     def envs(self):
         environs = {}
         with open(self.apprc) as file:
