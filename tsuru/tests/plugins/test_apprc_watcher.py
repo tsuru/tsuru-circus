@@ -72,6 +72,18 @@ class ApprcWatcherTest(TestCase):
         ]
         self.assertEqual(expected, kw)
 
+    def test_add_envs_dont_call_set_when_variables_dont_change(self):
+        plugin = ApprcWatcher("", "", 1)
+        plugin.call, kw = create_fake_call(None)
+        plugin.add_envs(name="name", envs=NOPATH_OUTPUT["options"]["env"])
+        self.assertEqual([], kw)
+
+    def test_add_envs_dont_call_set_when_variables_dont_change_and_path_is_defined(self):
+        plugin = ApprcWatcher("", "", 1)
+        plugin.call, kw = create_fake_call(None, PATH_OUTPUT)
+        plugin.add_envs(name="name", envs=PATH_OUTPUT["options"]["env"])
+        self.assertEqual([], kw)
+
     def test_look_after_add_envs(self):
         sr = {"statuses": {"name": "name", "cmd": "cmd"}}
         fake_call, kw = create_fake_call(sr)

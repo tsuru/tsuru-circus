@@ -47,7 +47,8 @@ class ApprcWatcher(CircusPlugin):
         if path and "PATH" not in envs:
             envs = copy.deepcopy(envs)
             envs["PATH"] = path
-        self.call("set", name=name, options={"env": envs})
+        if envs != current:
+            self.call("set", name=name, options={"env": envs})
 
     def envs(self):
         environs = {}
