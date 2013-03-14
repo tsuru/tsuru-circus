@@ -14,6 +14,7 @@ import os
 
 class ApprcWatcher(CircusPlugin):
     name = "apprc_watcher"
+    envs_to_keep = ("PATH", "http_proxy", "https_proxy", "no_proxy")
 
     def __init__(self, *args, **config):
         super(ApprcWatcher, self).__init__(*args, **config)
@@ -43,10 +44,15 @@ class ApprcWatcher(CircusPlugin):
 
     def add_envs(self, name, envs):
         current = self.call("options", name=name)["options"]["env"]
-        path = current.get("PATH")
-        if path and "PATH" not in envs:
-            envs = copy.deepcopy(envs)
-            envs["PATH"] = path
+        cp = None
+        for e in self.envs_to_keep:
+            value = current.get(e)
+            if value and e not in envs:
+                if cp is None:
+                    cp = copy.deepcopy(envs)
+                cp[e] = value
+        if cp is not None:
+            envs = cp
         if envs != current:
             self.call("set", name=name, options={"env": envs})
 

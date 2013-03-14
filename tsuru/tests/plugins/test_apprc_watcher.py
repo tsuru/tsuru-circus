@@ -2,8 +2,9 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-from unittest import TestCase
+import copy
 import os
+import unittest
 
 from tsuru.plugins import ApprcWatcher
 
@@ -26,6 +27,18 @@ NOPATH_OUTPUT = {
     },
 }
 
+PROXY_OUTPUT = {
+    "status": "ok",
+    "options": {
+        "max_retry": 5,
+        "env": {
+            "http_proxy": "http://myproxy.mycompany.com:3128",
+            "https_proxy": "http://myproxy.mycompany.com:3128",
+            "no_proxy": ".mycompany.com",
+        },
+    },
+}
+
 
 def create_fake_call(status_return, options_return=NOPATH_OUTPUT):
     kw = []
@@ -41,7 +54,7 @@ def create_fake_call(status_return, options_return=NOPATH_OUTPUT):
     return fake_call, kw
 
 
-class ApprcWatcherTest(TestCase):
+class ApprcWatcherTest(unittest.TestCase):
     def test_add_envs(self):
         plugin = ApprcWatcher("", "", 1)
         plugin.call, kw = create_fake_call(None)
@@ -83,6 +96,31 @@ class ApprcWatcherTest(TestCase):
         plugin.call, kw = create_fake_call(None, PATH_OUTPUT)
         plugin.add_envs(name="name", envs=PATH_OUTPUT["options"]["env"])
         self.assertEqual([], kw)
+
+    def test_add_envs_preserves_proxy_variables(self):
+        plugin = ApprcWatcher("", "", 1)
+        plugin.call, kw = create_fake_call(None, PROXY_OUTPUT)
+        plugin.add_envs(name="name", envs={"foo": "bar"})
+        env = copy.deepcopy(PROXY_OUTPUT["options"]["env"])
+        env["foo"] = "bar"
+        expected = [{
+            "name": "name",
+            "options": {"env": env},
+        }]
+        self.assertEqual(expected, kw)
+
+    def test_add_envs_may_override_proxy_variables(self):
+        plugin = ApprcWatcher("", "", 1)
+        plugin.call, kw = create_fake_call(None, PROXY_OUTPUT)
+        plugin.add_envs(name="name", envs={"foo": "bar", "http_proxy": "http://proxy.theircompany.com:3128"})
+        env = copy.deepcopy(PROXY_OUTPUT["options"]["env"])
+        env["foo"] = "bar"
+        env["http_proxy"] = "http://proxy.theircompany.com:3128"
+        expected = [{
+            "name": "name",
+            "options": {"env": env},
+        }]
+        self.assertEqual(expected, kw)
 
     def test_look_after_add_envs(self):
         sr = {"statuses": {"name": "name", "cmd": "cmd"}}
