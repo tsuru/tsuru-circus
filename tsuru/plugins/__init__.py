@@ -7,7 +7,6 @@ from circus.client import CircusClient
 from zmq.eventloop import ioloop
 from honcho.procfile import Procfile
 
-import copy
 import json
 import os
 
