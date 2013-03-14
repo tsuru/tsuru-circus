@@ -56,7 +56,6 @@ class ApprcWatcherTest(unittest.TestCase):
         self.assertEqual(expected, kw)
 
     def test_add_envs_dont_call_set_when_variables_dont_change(self):
-        self.maxDiff = None
         plugin = ApprcWatcher("", "", 1)
         envs = copy.deepcopy(NOPATH_OUTPUT)
         envs["options"]["env"].update(os.environ)
@@ -65,13 +64,23 @@ class ApprcWatcherTest(unittest.TestCase):
         self.assertEqual([], kw)
 
     def test_add_envs_dont_call_set_when_variables_dont_change_and_ses_os_environ(self):
-        self.maxDiff = None
         plugin = ApprcWatcher("", "", 1)
         envs = copy.deepcopy(NOPATH_OUTPUT)
         envs["options"]["env"].update(os.environ)
         plugin.call, kw = create_fake_call(None, envs)
         plugin.add_envs(name="name", envs=envs["options"]["env"])
         self.assertEqual([], kw)
+
+    def test_add_envs_override_environs(self):
+        plugin = ApprcWatcher("", "", 1)
+        envs = copy.deepcopy(NOPATH_OUTPUT)
+        envs["options"]["env"]["foo"] = "foo"
+        plugin.call, kw = create_fake_call(None, envs)
+        plugin.add_envs(name="name", envs={"foo": "bar"})
+        env = copy.deepcopy(os.environ)
+        env["foo"] = "bar"
+        expected = [{"name": "name", "options": {"env": env}}]
+        self.assertEqual(expected, kw)
 
     def test_look_after_add_envs(self):
         sr = {"statuses": {"name": "name", "cmd": "cmd"}}
