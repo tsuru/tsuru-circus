@@ -8,34 +8,11 @@ import unittest
 
 from tsuru.plugins import ApprcWatcher
 
-PATH_OUTPUT = {
-    "status": "ok",
-    "options": {
-        "max_retry": 5,
-        "env": {
-            "PATH": "/usr/bin:/bin:/sbin",
-            "SOMETHING": "adios",
-        },
-    },
-}
-
 NOPATH_OUTPUT = {
     "status": "ok",
     "options": {
         "max_retry": 5,
         "env": {"SOMETHING": "adios"},
-    },
-}
-
-PROXY_OUTPUT = {
-    "status": "ok",
-    "options": {
-        "max_retry": 5,
-        "env": {
-            "http_proxy": "http://myproxy.mycompany.com:3128",
-            "https_proxy": "http://myproxy.mycompany.com:3128",
-            "no_proxy": ".mycompany.com",
-        },
     },
 }
 
@@ -59,68 +36,42 @@ class ApprcWatcherTest(unittest.TestCase):
         plugin = ApprcWatcher("", "", 1)
         plugin.call, kw = create_fake_call(None)
         plugin.add_envs(name="name", envs={"foo": "bar"})
-        expected = [
-            {"name": "name", "options": {"env": {"foo": "bar"}}},
-        ]
+        env = copy.deepcopy(os.environ)
+        env["foo"] = "bar"
+        expected = [{"name": "name", "options": {"env": env}}]
         self.assertEqual(expected, kw)
 
-    def test_add_envs_preserves_path(self):
+    def test_add_envs_may_override_os_environ(self):
+        def remove_env(name):
+            del os.environ[name]
+        os.environ["SOMETHING_UNKNOWN"] = "123"
+        self.addCleanup(remove_env, "SOMETHING_UNKNOWN")
         plugin = ApprcWatcher("", "", 1)
-        plugin.call, kw = create_fake_call(None, PATH_OUTPUT)
-        plugin.add_envs(name="name", envs={"foo": "bar"})
-        expected = [
-            {"name": "name",
-             "options": {"env": {"foo": "bar",
-                                 "PATH": PATH_OUTPUT["options"]["env"]["PATH"]}}},
-        ]
-        self.assertEqual(expected, kw)
-
-    def test_add_envs_may_override_path(self):
-        plugin = ApprcWatcher("", "", 1)
-        plugin.call, kw = create_fake_call(None, PATH_OUTPUT)
-        plugin.add_envs(name="name", envs={"foo": "bar", "PATH": "/bin"})
-        expected = [
-            {"name": "name",
-             "options": {"env": {"foo": "bar", "PATH": "/bin"}}},
-        ]
+        plugin.call, kw = create_fake_call(None)
+        plugin.add_envs(name="name", envs={"foo": "bar", "SOMETHING_UNKNOWN": "456"})
+        env = copy.deepcopy(os.environ)
+        env["SOMETHING_UNKNOWN"] = "456"
+        env["foo"] = "bar"
+        expected = [{"name": "name", "options": {"env": env}}]
         self.assertEqual(expected, kw)
 
     def test_add_envs_dont_call_set_when_variables_dont_change(self):
+        self.maxDiff = None
         plugin = ApprcWatcher("", "", 1)
-        plugin.call, kw = create_fake_call(None)
+        envs = copy.deepcopy(NOPATH_OUTPUT)
+        envs["options"]["env"].update(os.environ)
+        plugin.call, kw = create_fake_call(None, envs)
         plugin.add_envs(name="name", envs=NOPATH_OUTPUT["options"]["env"])
         self.assertEqual([], kw)
 
-    def test_add_envs_dont_call_set_when_variables_dont_change_and_path_is_defined(self):
+    def test_add_envs_dont_call_set_when_variables_dont_change_and_ses_os_environ(self):
+        self.maxDiff = None
         plugin = ApprcWatcher("", "", 1)
-        plugin.call, kw = create_fake_call(None, PATH_OUTPUT)
-        plugin.add_envs(name="name", envs=PATH_OUTPUT["options"]["env"])
+        envs = copy.deepcopy(NOPATH_OUTPUT)
+        envs["options"]["env"].update(os.environ)
+        plugin.call, kw = create_fake_call(None, envs)
+        plugin.add_envs(name="name", envs=envs["options"]["env"])
         self.assertEqual([], kw)
-
-    def test_add_envs_preserves_proxy_variables(self):
-        plugin = ApprcWatcher("", "", 1)
-        plugin.call, kw = create_fake_call(None, PROXY_OUTPUT)
-        plugin.add_envs(name="name", envs={"foo": "bar"})
-        env = copy.deepcopy(PROXY_OUTPUT["options"]["env"])
-        env["foo"] = "bar"
-        expected = [{
-            "name": "name",
-            "options": {"env": env},
-        }]
-        self.assertEqual(expected, kw)
-
-    def test_add_envs_may_override_proxy_variables(self):
-        plugin = ApprcWatcher("", "", 1)
-        plugin.call, kw = create_fake_call(None, PROXY_OUTPUT)
-        plugin.add_envs(name="name", envs={"foo": "bar", "http_proxy": "http://proxy.theircompany.com:3128"})
-        env = copy.deepcopy(PROXY_OUTPUT["options"]["env"])
-        env["foo"] = "bar"
-        env["http_proxy"] = "http://proxy.theircompany.com:3128"
-        expected = [{
-            "name": "name",
-            "options": {"env": env},
-        }]
-        self.assertEqual(expected, kw)
 
     def test_look_after_add_envs(self):
         sr = {"statuses": {"name": "name", "cmd": "cmd"}}
@@ -131,6 +82,7 @@ class ApprcWatcherTest(unittest.TestCase):
                                     "testdata/apprc")
         plugin.look_after()
         env = {"VAR1": "value-1", "port": "8888", "VAR2": "value2"}
+        env.update(os.environ)
         expected = [
             {"name": "cmd", "options": {"env": env}},
             {"name": "name", "options": {"env": env}},
@@ -147,6 +99,7 @@ class ApprcWatcherTest(unittest.TestCase):
                                     "testdata/apprc")
         plugin.look_after()
         env = {"VAR1": "value-1", "port": "8888", "VAR2": "value2"}
+        env.update(os.environ)
         expected = [
             {"name": "name", "options": {"env": env}},
         ]

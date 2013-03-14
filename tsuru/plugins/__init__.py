@@ -44,17 +44,10 @@ class ApprcWatcher(CircusPlugin):
 
     def add_envs(self, name, envs):
         current = self.call("options", name=name)["options"]["env"]
-        cp = None
-        for e in self.envs_to_keep:
-            value = current.get(e)
-            if value and e not in envs:
-                if cp is None:
-                    cp = copy.deepcopy(envs)
-                cp[e] = value
-        if cp is not None:
-            envs = cp
-        if envs != current:
-            self.call("set", name=name, options={"env": envs})
+        values = copy.deepcopy(os.environ)
+        values.update(envs)
+        if values != current:
+            self.call("set", name=name, options={"env": values})
 
     def envs(self):
         environs = {}
