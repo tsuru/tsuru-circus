@@ -56,6 +56,17 @@ class ProcfileWatcherTest(TestCase):
         to_add, to_remove, to_change = plugin.commands(procfile)
         plugin.call.assert_called_with("status")
 
+    def test_commands_ignore_plugin(self):
+        result = Mock()
+        result.return_value = {"statuses": {"plugin:tsuru-circus-ProcfileWatcher": "ok"}}
+        plugin = ProcfileWatcher("", "", 1)
+        plugin.call = result
+        procfile = Procfile('web: gunicorn -b 0.0.0.0:8080 abyss.wsgi\n')
+        to_add, to_remove, to_change = plugin.commands(procfile)
+        self.assertEqual(set(["web"]), to_add)
+        self.assertEqual(set([]), to_remove)
+        self.assertEqual({}, to_change)
+
     def test_envs(self):
         plugin = ProcfileWatcher("", "", 1)
         plugin.apprc = os.path.join(os.path.dirname(__file__),

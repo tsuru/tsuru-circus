@@ -138,7 +138,7 @@ class ProcfileWatcher(CircusPlugin):
 
     def commands(self, procfile):
         cmds = self.call("status")["statuses"]
-        cmds_names = set(cmds.keys())
+        cmds_names = set([k for k in cmds.keys() if not k.startswith("plugin:")])
         new_cmds = set(procfile.commands.keys())
         to_remove = cmds_names.difference(new_cmds)
         to_add = new_cmds.difference(cmds_names)
