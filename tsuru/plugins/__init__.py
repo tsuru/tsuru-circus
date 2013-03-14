@@ -14,7 +14,6 @@ import os
 
 class ApprcWatcher(CircusPlugin):
     name = "apprc_watcher"
-    envs_to_keep = ("PATH", "http_proxy", "https_proxy", "no_proxy")
 
     def __init__(self, *args, **config):
         super(ApprcWatcher, self).__init__(*args, **config)
