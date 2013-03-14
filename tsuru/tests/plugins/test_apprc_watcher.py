@@ -17,6 +17,10 @@ NOPATH_OUTPUT = {
 }
 
 
+def remove_env(name):
+    del os.environ[name]
+
+
 def create_fake_call(status_return, options_return=NOPATH_OUTPUT):
     kw = []
 
@@ -42,8 +46,6 @@ class ApprcWatcherTest(unittest.TestCase):
         self.assertEqual(expected, kw)
 
     def test_add_envs_may_override_os_environ(self):
-        def remove_env(name):
-            del os.environ[name]
         os.environ["SOMETHING_UNKNOWN"] = "123"
         self.addCleanup(remove_env, "SOMETHING_UNKNOWN")
         plugin = ApprcWatcher("", "", 1)
@@ -79,6 +81,28 @@ class ApprcWatcherTest(unittest.TestCase):
         plugin.add_envs(name="name", envs={"foo": "bar"})
         env = copy.deepcopy(os.environ)
         env["foo"] = "bar"
+        expected = [{"name": "name", "options": {"env": env}}]
+        self.assertEqual(expected, kw)
+
+    def test_add_env_ignores_PYTHONPATH_from_os_environ(self):
+        os.environ["PYTHONPATH"] = "/home/user/python"
+        self.addCleanup(remove_env, "PYTHONPATH")
+        plugin = ApprcWatcher("", "", 1)
+        plugin.call, kw = create_fake_call(None)
+        plugin.add_envs(name="name", envs={"foo": "bar"})
+        env = copy.deepcopy(os.environ)
+        env["foo"] = "bar"
+        del env["PYTHONPATH"]
+        expected = [{"name": "name", "options": {"env": env}}]
+        self.assertEqual(expected, kw)
+
+    def test_add_env_doesnt_ignore_PYTHONPATH_from_apprc(self):
+        plugin = ApprcWatcher("", "", 1)
+        plugin.call, kw = create_fake_call(None)
+        plugin.add_envs(name="name", envs={"foo": "bar", "PYTHONPATH": "/usr/lib/python"})
+        env = copy.deepcopy(os.environ)
+        env["foo"] = "bar"
+        env["PYTHONPATH"] = "/usr/lib/python"
         expected = [{"name": "name", "options": {"env": env}}]
         self.assertEqual(expected, kw)
 

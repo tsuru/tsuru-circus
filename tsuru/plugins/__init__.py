@@ -43,8 +43,10 @@ class ApprcWatcher(CircusPlugin):
 
     def add_envs(self, name, envs):
         current = self.call("options", name=name)["options"]["env"]
-        values = copy.deepcopy(os.environ)
-        values.update(envs)
+        values = {}
+        values.update(os.environ, **envs)
+        if "PYTHONPATH" in values and "PYTHONPATH" not in envs:
+            del values["PYTHONPATH"]
         if values != current:
             self.call("set", name=name, options={"env": values})
 
