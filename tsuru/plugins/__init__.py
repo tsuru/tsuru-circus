@@ -87,7 +87,7 @@ class ProcfileWatcher(CircusPlugin):
         self.circus_client = CircusClient()
 
     def get_cmd(self, name):
-        return self.call("get", name=name, keys=["cmd",])["cmd"]
+        return self.call("get", name=name, keys=["cmd",])["options"]["cmd"]
 
     def envs(self):
         environs = {}

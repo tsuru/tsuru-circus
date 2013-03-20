@@ -131,7 +131,7 @@ class ProcfileWatcherTest(TestCase):
     def test_get_cmd(self):
         plugin = ProcfileWatcher("", "", 1)
         plugin.call = Mock()
-        plugin.call.return_value = {"cmd": "ble"}
+        plugin.call.return_value = {"options": {"cmd": "ble"}}
         cmd = plugin.get_cmd("name")
         self.assertEqual("ble", cmd)
         plugin.call.assert_called_with("get",
