@@ -85,7 +85,6 @@ class ProcfileWatcher(CircusPlugin):
                                               self.loop_rate * 1000,
                                               self.loop)
         self.circus_client = CircusClient()
-        self.cmds = {}
 
     def get_cmd(self, name):
         return self.call("get", name=name, keys=["cmd",])["cmd"]
@@ -111,7 +110,6 @@ class ProcfileWatcher(CircusPlugin):
         pass
 
     def add_watcher(self, name, cmd):
-        self.cmds[name] = cmd
         env = {"port": self.port}
         env.update(self.envs())
         options = {
