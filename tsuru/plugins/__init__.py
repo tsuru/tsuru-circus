@@ -148,7 +148,7 @@ class ProcfileWatcher(CircusPlugin):
         to_change_names = cmds_names.intersection(new_cmds)
         to_change = {}
         for name in to_change_names:
-            if self.cmds.get(name) != procfile.commands.get(name):
+            if self.get_cmd(name) != procfile.commands.get(name):
                 to_change[name] = procfile.commands[name]
         return to_add, to_remove, to_change
 
