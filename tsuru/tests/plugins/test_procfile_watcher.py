@@ -136,4 +136,4 @@ class ProcfileWatcherTest(TestCase):
         self.assertEqual("ble", cmd)
         plugin.call.assert_called_with("get",
                                        name="name",
-                                       keys=["cmd",])
+                                       keys=["cmd"])
