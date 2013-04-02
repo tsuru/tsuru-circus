@@ -66,17 +66,6 @@ class ProcfileWatcherTest(TestCase):
         self.assertEqual(set([]), to_remove)
         self.assertEqual({}, to_change)
 
-    def test_envs(self):
-        plugin = ProcfileWatcher("", "", 1)
-        plugin.apprc = os.path.join(os.path.dirname(__file__),
-                                    "testdata/apprc")
-        envs = plugin.envs()
-        expected = {
-            "VAR1": "value-1",
-            "VAR2": "value2",
-        }
-        self.assertDictEqual(expected, envs)
-
     def test_look_after_add_new_cmds(self):
         plugin = ProcfileWatcher("", "", 1)
         plugin.procfile_path = os.path.join(os.path.dirname(__file__),

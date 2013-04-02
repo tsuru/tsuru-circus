@@ -2,13 +2,15 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-from circus.plugins import CircusPlugin
-from circus.client import CircusClient
-from zmq.eventloop import ioloop
-from honcho.procfile import Procfile
-
 import json
 import os
+
+from circus.plugins import CircusPlugin
+from circus.client import CircusClient
+from honcho.procfile import Procfile
+from zmq.eventloop import ioloop
+
+from tsuru import common
 
 
 class ApprcWatcher(CircusPlugin):
@@ -35,7 +37,7 @@ class ApprcWatcher(CircusPlugin):
     def look_after(self):
         if os.path.exists(self.apprc):
             envs = {"port": self.port}
-            envs.update(self.envs())
+            envs.update(common.load_envs(self.apprc))
             for name in self.cmds():
                 if not name.startswith("plugin:"):
                     self.add_envs(name, envs)
@@ -48,17 +50,6 @@ class ApprcWatcher(CircusPlugin):
             del values["PYTHONPATH"]
         if values != current:
             self.call("set", name=name, options={"env": values})
-
-    def envs(self):
-        environs = {}
-        with open(self.apprc) as file:
-            for line in file.readlines():
-                if "export" in line:
-                    line = line.replace("export ", "")
-                    k, v = line.split("=")
-                    v = v.replace("\n", "").replace('"', '')
-                    environs[k] = v
-        return environs
 
     def cmds(self):
         return self.call("status")["statuses"].keys()
@@ -89,17 +80,6 @@ class ProcfileWatcher(CircusPlugin):
     def get_cmd(self, name):
         return self.call("get", name=name, keys=["cmd"])["options"]["cmd"]
 
-    def envs(self):
-        environs = {}
-        with open(self.apprc) as file:
-            for line in file.readlines():
-                if "export" in line:
-                    line = line.replace("export ", "")
-                    k, v = line.split("=")
-                    v = v.replace("\n", "").replace('"', '')
-                    environs[k] = v
-        return environs
-
     def handle_init(self):
         self.period.start()
 
@@ -111,7 +91,7 @@ class ProcfileWatcher(CircusPlugin):
 
     def add_watcher(self, name, cmd):
         env = {"port": self.port}
-        env.update(self.envs())
+        env.update(common.load_envs(self.apprc))
         options = {
             "env": env,
             "copy_env": True,

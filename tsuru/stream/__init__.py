@@ -6,6 +6,8 @@ import json
 import re
 import requests
 
+from tsuru import common
+
 
 def extract_message(msg):
     # 2012-11-06 18:30:10 [13887] [INFO]
@@ -27,19 +29,8 @@ class Stream(object):
             requests.post(url, data=json.dumps(messages))
 
     def appname_and_host(self):
-        envs = self.load_envs()
+        envs = common.load_envs(self.apprc)
         return envs.get("TSURU_APPNAME"), envs.get("TSURU_HOST")
-
-    def load_envs(self):
-        envs = {}
-        with open(self.apprc) as file:
-            for line in file.readlines():
-                if "export" in line:
-                    line = line.replace("export ", "")
-                    k, v = line.split("=")
-                    v = v.replace("\n", "").replace('"', '')
-                    envs[k] = v
-        return envs
 
     def close(self):
         pass
