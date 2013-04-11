@@ -22,15 +22,16 @@ class Stream(object):
         self.apprc = "/home/application/apprc"
 
     def __call__(self, data):
-        tsuru_appname, tsuru_host = self.appname_and_host()
-        if tsuru_appname and tsuru_host:
-            url = "{0}/apps/{1}/log".format(tsuru_host, tsuru_appname)
+        appname, host, token = self.load_envs()
+        if appname and host and token:
+            url = "{0}/apps/{1}/log".format(host, appname)
             messages = extract_message(data["data"])
-            requests.post(url, data=json.dumps(messages))
+            requests.post(url, data=json.dumps(messages),
+                          headers={"Authorization": token})
 
-    def appname_and_host(self):
+    def load_envs(self):
         envs = common.load_envs(self.apprc)
-        return envs.get("TSURU_APPNAME"), envs.get("TSURU_HOST")
+        return envs.get("TSURU_APPNAME"), envs.get("TSURU_HOST"), envs.get("TSURU_APP_TOKEN")
 
     def close(self):
         pass

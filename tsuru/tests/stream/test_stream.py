@@ -29,16 +29,18 @@ class StreamTestCase(unittest.TestCase):
     def test_should_send_log_to_tsuru(self, post):
         post.return_value = mock.Mock(status_code=200)
         self.stream(self.data)
-        appname, host = self.stream.appname_and_host()
+        appname, host, token = self.stream.load_envs()
         url = "{0}/apps/{1}/log".format(host, appname)
         expected_msg = "Starting gunicorn 0.15.0\n"
         expected_data = json.dumps([expected_msg])
-        post.assert_called_with(url, data=expected_data)
+        post.assert_called_with(url, data=expected_data,
+                                headers={"Authorization": token})
 
-    def test_should_slience_errors_when_envs_does_not_exist(self):
+    @mock.patch("tsuru.common.load_envs")
+    def test_should_slience_errors_when_envs_does_not_exist(lenvs, self):
+        lenvs.return_value = {}
         try:
             stream = Stream()
-            stream.load_envs = lambda: {}
             stream(self.data)
-        except:
-            assert False
+        except Exception as e:
+            self.fail("Should not fail when envs does not exist. Exception: %s" % e)
