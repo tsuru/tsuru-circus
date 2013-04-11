@@ -27,13 +27,13 @@ class StreamTestCase(unittest.TestCase):
 
     @mock.patch("requests.post")
     def test_should_send_log_to_tsuru(self, post):
-            post.return_value = mock.Mock(status_code=200)
-            self.stream(self.data)
-            appname, host = self.stream.appname_and_host()
-            url = "{0}/apps/{1}/log".format(host, appname)
-            expected_msg = "Starting gunicorn 0.15.0\n"
-            expected_data = json.dumps([expected_msg])
-            post.assert_called_with(url, data=expected_data)
+        post.return_value = mock.Mock(status_code=200)
+        self.stream(self.data)
+        appname, host = self.stream.appname_and_host()
+        url = "{0}/apps/{1}/log".format(host, appname)
+        expected_msg = "Starting gunicorn 0.15.0\n"
+        expected_data = json.dumps([expected_msg])
+        post.assert_called_with(url, data=expected_data)
 
     def test_should_slience_errors_when_envs_does_not_exist(self):
         try:
