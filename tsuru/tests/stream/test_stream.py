@@ -34,7 +34,7 @@ class StreamTestCase(unittest.TestCase):
         expected_msg = "Starting gunicorn 0.15.0\n"
         expected_data = json.dumps([expected_msg])
         post.assert_called_with(url, data=expected_data,
-                                headers={"Authorization": token})
+                                headers={"Authorization": "bearer " + token})
 
     @mock.patch("tsuru.common.load_envs")
     def test_should_slience_errors_when_envs_does_not_exist(lenvs, self):

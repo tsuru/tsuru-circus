@@ -27,7 +27,7 @@ class Stream(object):
             url = "{0}/apps/{1}/log".format(host, appname)
             messages = extract_message(data["data"])
             requests.post(url, data=json.dumps(messages),
-                          headers={"Authorization": token})
+                          headers={"Authorization": "bearer " + token})
 
     def load_envs(self):
         envs = common.load_envs(self.apprc)
