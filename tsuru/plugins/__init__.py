@@ -13,6 +13,20 @@ from zmq.eventloop import ioloop
 from tsuru import common
 
 
+class FileWatcher(object):
+    def __init__(self, filename, callback):
+        self._filename = filename
+        self._callback = callback
+        self._mtime = 0
+
+    def __call__(self, *args, **kwargs):
+        if os.path.exists(self._filename):
+            mtime = os.path.getmtime(self._filename)
+            if mtime > self._mtime:
+                self._mtime = mtime
+                self._callback()
+
+
 class ApprcWatcher(CircusPlugin):
     name = "apprc_watcher"
 
