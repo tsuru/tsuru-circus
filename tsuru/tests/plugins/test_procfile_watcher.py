@@ -66,7 +66,7 @@ class ProcfileWatcherTest(TestCase):
         self.assertEqual(set([]), to_remove)
         self.assertEqual({}, to_change)
 
-    def test_look_after_add_new_cmds(self):
+    def test_reload_procfile_add_new_cmds(self):
         plugin = ProcfileWatcher("", "", 1)
         plugin.procfile_path = os.path.join(os.path.dirname(__file__),
                                             "testdata/Procfile1")
@@ -74,7 +74,7 @@ class ProcfileWatcherTest(TestCase):
         plugin.envs = lambda: {}
         plugin.call = Mock()
         plugin.call.return_value = {"statuses": {}}
-        plugin.look_after()
+        plugin.reload_procfile()
         options = json.dumps({
             "command": "add",
             "properties": {
@@ -94,16 +94,16 @@ class ProcfileWatcherTest(TestCase):
         })
         plugin.circus_client.call.assert_called_with(options)
 
-    def test_look_after_remove_old_cmds(self):
+    def test_reload_procfile_remove_old_cmds(self):
         plugin = ProcfileWatcher("", "", 1)
         plugin.call = Mock()
         plugin.call.return_value = {"statuses": {"name": "name", "cmd": "cmd"}}
         plugin.procfile_path = os.path.join(os.path.dirname(__file__),
                                             "testdata/Procfile2")
-        plugin.look_after()
+        plugin.reload_procfile()
         plugin.call.assert_called_with("rm", name="name")
 
-    def test_look_after_update_cmds(self):
+    def test_reload_procfile_update_cmds(self):
         plugin = ProcfileWatcher("", "", 1)
         plugin.call = Mock()
         plugin.call.return_value = {"statuses": {"name": "name", "cmd": "cmd"}}
@@ -111,7 +111,7 @@ class ProcfileWatcherTest(TestCase):
         plugin.get_cmd.return_value = "cmd"
         plugin.procfile_path = os.path.join(os.path.dirname(__file__),
                                             "testdata/Procfile3")
-        plugin.look_after()
+        plugin.reload_procfile()
         plugin.get_cmd.assert_called_with("name")
         plugin.call.assert_called_with("set",
                                        name="name",

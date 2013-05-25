@@ -85,7 +85,8 @@ class ProcfileWatcher(CircusPlugin):
                                                   "tsuru.stream.Stream")}
         self.stdout_stream = {"class": config.get("stdout_stream",
                                                   "tsuru.stream.Stream")}
-        self.period = ioloop.PeriodicCallback(self.look_after,
+        file_watcher = FileWatcher(self.procfile_path, self.reload_procfile)
+        self.period = ioloop.PeriodicCallback(file_watcher,
                                               self.loop_rate * 1000,
                                               self.loop)
         self.circus_client = CircusClient()
@@ -143,17 +144,16 @@ class ProcfileWatcher(CircusPlugin):
                 to_change[name] = procfile.commands[name]
         return to_add, to_remove, to_change
 
-    def look_after(self):
-        if os.path.exists(self.procfile_path):
-            with open(self.procfile_path) as file:
-                procfile = Procfile(file.read())
-                to_add, to_remove, to_change = self.commands(procfile)
+    def reload_procfile(self):
+        with open(self.procfile_path) as file:
+            procfile = Procfile(file.read())
+            to_add, to_remove, to_change = self.commands(procfile)
 
-                for name in to_remove:
-                    self.remove_watcher(name)
+            for name in to_remove:
+                self.remove_watcher(name)
 
-                for name in to_add:
-                    self.add_watcher(name=name, cmd=procfile.commands[name])
+            for name in to_add:
+                self.add_watcher(name=name, cmd=procfile.commands[name])
 
-                for name, cmd in to_change.items():
-                    self.change_cmd(name=name, cmd=procfile.commands[name])
+            for name, cmd in to_change.items():
+                self.change_cmd(name=name, cmd=procfile.commands[name])
