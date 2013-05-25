@@ -73,7 +73,7 @@ class ProcfileWatcher(CircusPlugin):
 
     def __init__(self, *args, **config):
         super(ProcfileWatcher, self).__init__(*args, **config)
-        self.loop_rate = config.get("loop_rate", 10)  # in seconds
+        self.loop_rate = config.get("loop_rate", 3)  # in seconds
         self.procfile_path = config.get("app_path",
                                         "/home/application/current/Procfile")
         self.working_dir = config.get("working_dir",
