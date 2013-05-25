@@ -35,7 +35,7 @@ class ApprcWatcher(CircusPlugin):
         self.loop_rate = config.get("loop_rate", 10)  # in seconds
         self.apprc = config.get("apprc", "/home/application/apprc")
         self.port = config.get("port", "8888")
-        self.period = ioloop.PeriodicCallback(self.look_after,
+        self.period = ioloop.PeriodicCallback(FileWatcher(self.apprc, self.reload_env),
                                               self.loop_rate * 1000,
                                               self.loop)
 
@@ -48,13 +48,12 @@ class ApprcWatcher(CircusPlugin):
     def handle_recv(self, data):
         pass
 
-    def look_after(self):
-        if os.path.exists(self.apprc):
-            envs = {"port": self.port}
-            envs.update(common.load_envs(self.apprc))
-            for name in self.cmds():
-                if not name.startswith("plugin:"):
-                    self.add_envs(name, envs)
+    def reload_env(self):
+        envs = {"port": self.port}
+        envs.update(common.load_envs(self.apprc))
+        for name in self.cmds():
+            if not name.startswith("plugin:"):
+                self.add_envs(name, envs)
 
     def add_envs(self, name, envs):
         current = self.call("options", name=name)["options"]["env"]

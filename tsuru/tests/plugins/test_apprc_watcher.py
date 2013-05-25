@@ -106,14 +106,14 @@ class ApprcWatcherTest(unittest.TestCase):
         expected = [{"name": "name", "options": {"env": env}}]
         self.assertEqual(expected, kw)
 
-    def test_look_after_add_envs(self):
+    def test_reload_env_add_envs(self):
         sr = {"statuses": {"name": "name", "cmd": "cmd"}}
         fake_call, kw = create_fake_call(sr)
         plugin = ApprcWatcher("", "", 1)
         plugin.call = fake_call
         plugin.apprc = os.path.join(os.path.dirname(__file__),
                                     "testdata/apprc")
-        plugin.look_after()
+        plugin.reload_env()
         env = {"VAR1": "value-1", "port": "8888", "VAR2": "value2"}
         env.update(os.environ)
         expected = [
@@ -122,7 +122,7 @@ class ApprcWatcherTest(unittest.TestCase):
         ]
         self.assertEqual(expected, sorted(kw, key=lambda x: x["name"]))
 
-    def test_look_after_skips_plugins(self):
+    def test_reload_env_skips_plugins(self):
         sr = {"statuses": {"name": "name",
                            "plugin:tsuru-circus-ApprcWatcher": "ok"}}
         fake_call, kw = create_fake_call(sr)
@@ -130,7 +130,7 @@ class ApprcWatcherTest(unittest.TestCase):
         plugin.call = fake_call
         plugin.apprc = os.path.join(os.path.dirname(__file__),
                                     "testdata/apprc")
-        plugin.look_after()
+        plugin.reload_env()
         env = {"VAR1": "value-1", "port": "8888", "VAR2": "value2"}
         env.update(os.environ)
         expected = [
