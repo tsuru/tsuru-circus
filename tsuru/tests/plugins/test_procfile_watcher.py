@@ -178,3 +178,29 @@ class ProcfileWatcherTest(TestCase):
         })
         plugin.add_watcher(name=name, cmd=cmd)
         plugin.circus_client.call.assert_called_with(options)
+
+    def test_should_replace_cmds_with_environ_with_braces(self):
+        plugin = ProcfileWatcher("", "", 1)
+        plugin.envs = lambda: {}
+        plugin.circus_client = Mock()
+        name = "name"
+        cmd = "echo ${PORT}"
+        options = json.dumps({
+            "command": "add",
+            "properties": {
+                "cmd": "echo 8888",
+                "name": name,
+                "args": [],
+                "options": {
+                    "env": {"port": "8888"},
+                    "copy_env": True,
+                    "working_dir": "/home/application/current",
+                    "stderr_stream": {"class": "tsuru.stream.Stream"},
+                    "stdout_stream": {"class": "tsuru.stream.Stream"},
+                    "uid": "ubuntu",
+                },
+                "start": True,
+            },
+        })
+        plugin.add_watcher(name=name, cmd=cmd)
+        plugin.circus_client.call.assert_called_with(options)

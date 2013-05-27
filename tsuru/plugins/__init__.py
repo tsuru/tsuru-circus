@@ -21,7 +21,7 @@ def replace_args(data, **options):
         key = key.lower()
         fmt_options[key] = value
 
-    match = re.compile(r'\$([\w\.]+)', re.I)
+    match = re.compile(r'\$([\w\.]+)|\$\{([\w\.]+)\}', re.I)
 
     def _repl(matchobj):
         option = None
