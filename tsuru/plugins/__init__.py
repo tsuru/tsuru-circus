@@ -4,13 +4,38 @@
 
 import json
 import os
+import re
 
 from circus.plugins import CircusPlugin
 from circus.client import CircusClient
+
 from honcho.procfile import Procfile
 from zmq.eventloop import ioloop
 
 from tsuru import common
+
+
+def replace_args(data, **options):
+    fmt_options = {}
+    for key, value in options.items():
+        key = key.lower()
+        fmt_options[key] = value
+
+    match = re.compile(r'\$([\w\.]+)', re.I)
+
+    def _repl(matchobj):
+        option = None
+
+        for result in matchobj.groups():
+            if result is not None:
+                option = result.lower()
+                break
+
+        if option in fmt_options:
+            return str(fmt_options[option])
+
+        return matchobj.group()
+    return match.sub(_repl, data)
 
 
 class FileWatcher(object):
@@ -106,6 +131,7 @@ class ProcfileWatcher(CircusPlugin):
     def add_watcher(self, name, cmd):
         env = {"port": self.port}
         env.update(common.load_envs(self.apprc))
+        cmd = replace_args(cmd, **env)
         options = {
             "env": env,
             "copy_env": True,
