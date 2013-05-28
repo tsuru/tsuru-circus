@@ -155,6 +155,9 @@ class ProcfileWatcher(CircusPlugin):
         self.call("rm", name=name)
 
     def change_cmd(self, name, cmd):
+        env = {"port": self.port}
+        env.update(common.load_envs(self.apprc))
+        cmd = replace_args(cmd, **env)
         self.call("set", name=name, options={"cmd": cmd})
 
     def commands(self, procfile):

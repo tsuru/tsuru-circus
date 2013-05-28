@@ -3,7 +3,7 @@
 # license that can be found in the LICENSE file.
 
 from unittest import TestCase
-from mock import Mock
+from mock import Mock, patch
 import json
 import os.path
 
@@ -204,3 +204,17 @@ class ProcfileWatcherTest(TestCase):
         })
         plugin.add_watcher(name=name, cmd=cmd)
         plugin.circus_client.call.assert_called_with(options)
+
+    @patch("tsuru.common.load_envs")
+    def test_change_cmd_should_replace_cmds_with_environ(self, load_envs):
+        load_envs.return_value = {"BLE": "bla"}
+        plugin = ProcfileWatcher("", "", 1)
+        plugin.envs = lambda: {}
+        plugin.call = Mock()
+        plugin.port = 8888
+        name = "name"
+        cmd = "echo ${PORT} ${BLE}"
+        plugin.change_cmd(name=name, cmd=cmd)
+        plugin.call.assert_called_with('set',
+                                       options={'cmd': 'echo 8888 bla'},
+                                       name=name)
