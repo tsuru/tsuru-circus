@@ -26,7 +26,7 @@ class ProcfileWatcherTest(TestCase):
                 "name": name,
                 "args": [],
                 "options": {
-                    "env": {"port": "8888"},
+                    "env": {"port": "8888", "PORT": "8888"},
                     "copy_env": True,
                     "working_dir": "/home/application/current",
                     "stderr_stream": {"class": "tsuru.stream.Stream"},
@@ -82,7 +82,7 @@ class ProcfileWatcherTest(TestCase):
                 "name": "name",
                 "args": [],
                 "options": {
-                    "env": {"port": "8888"},
+                    "env": {"port": "8888", "PORT": "8888"},
                     "copy_env": True,
                     "working_dir": "/home/application/current",
                     "stderr_stream": {"class": "tsuru.stream.Stream"},
@@ -140,7 +140,7 @@ class ProcfileWatcherTest(TestCase):
                 "name": name,
                 "args": [],
                 "options": {
-                    "env": {"port": "8888"},
+                    "env": {"port": "8888", "PORT": "8888"},
                     "copy_env": True,
                     "working_dir": "/home/application/current",
                     "stderr_stream": {"class": "tsuru.stream.Stream"},
@@ -166,7 +166,7 @@ class ProcfileWatcherTest(TestCase):
                 "name": name,
                 "args": [],
                 "options": {
-                    "env": {"port": "8888"},
+                    "env": {"port": "8888", "PORT": "8888"},
                     "copy_env": True,
                     "working_dir": "/home/application/current",
                     "stderr_stream": {"class": "tsuru.stream.Stream"},
@@ -192,7 +192,7 @@ class ProcfileWatcherTest(TestCase):
                 "name": name,
                 "args": [],
                 "options": {
-                    "env": {"port": "8888"},
+                    "env": {"port": "8888", "PORT": "8888"},
                     "copy_env": True,
                     "working_dir": "/home/application/current",
                     "stderr_stream": {"class": "tsuru.stream.Stream"},

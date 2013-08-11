@@ -129,7 +129,7 @@ class ProcfileWatcher(CircusPlugin):
         pass
 
     def add_watcher(self, name, cmd):
-        env = {"port": self.port}
+        env = {"port": self.port, "PORT": self.port}
         env.update(common.load_envs(self.apprc))
         cmd = replace_args(cmd, **env)
         options = {
