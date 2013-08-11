@@ -13,13 +13,8 @@ from honcho.procfile import Procfile
 
 
 class ProcfileWatcherTest(TestCase):
-    def test_add_watcher(self):
-        plugin = ProcfileWatcher("", "", 1)
-        plugin.envs = lambda: {}
-        plugin.circus_client = Mock()
-        name = "name"
-        cmd = "cmd"
-        options = json.dumps({
+    def build_options(self, name, cmd):
+        return json.dumps({
             "command": "add",
             "properties": {
                 "cmd": cmd,
@@ -36,6 +31,14 @@ class ProcfileWatcherTest(TestCase):
                 "start": True,
             },
         })
+
+    def test_add_watcher(self):
+        plugin = ProcfileWatcher("", "", 1)
+        plugin.envs = lambda: {}
+        plugin.circus_client = Mock()
+        name = "name"
+        cmd = "cmd"
+        options = self.build_options(name, cmd)
         plugin.add_watcher(name=name, cmd=cmd)
         plugin.circus_client.call.assert_called_with(options)
 
@@ -75,23 +78,7 @@ class ProcfileWatcherTest(TestCase):
         plugin.call = Mock()
         plugin.call.return_value = {"statuses": {}}
         plugin.reload_procfile()
-        options = json.dumps({
-            "command": "add",
-            "properties": {
-                "cmd": "cmd",
-                "name": "name",
-                "args": [],
-                "options": {
-                    "env": {"port": "8888", "PORT": "8888"},
-                    "copy_env": True,
-                    "working_dir": "/home/application/current",
-                    "stderr_stream": {"class": "tsuru.stream.Stream"},
-                    "stdout_stream": {"class": "tsuru.stream.Stream"},
-                    "uid": "ubuntu",
-                },
-                "start": True,
-            },
-        })
+        options = self.build_options("name", "cmd")
         plugin.circus_client.call.assert_called_with(options)
 
     def test_reload_procfile_remove_old_cmds(self):
@@ -133,23 +120,7 @@ class ProcfileWatcherTest(TestCase):
         plugin.circus_client = Mock()
         name = "name"
         cmd = "echo $port"
-        options = json.dumps({
-            "command": "add",
-            "properties": {
-                "cmd": "echo 8888",
-                "name": name,
-                "args": [],
-                "options": {
-                    "env": {"port": "8888", "PORT": "8888"},
-                    "copy_env": True,
-                    "working_dir": "/home/application/current",
-                    "stderr_stream": {"class": "tsuru.stream.Stream"},
-                    "stdout_stream": {"class": "tsuru.stream.Stream"},
-                    "uid": "ubuntu",
-                },
-                "start": True,
-            },
-        })
+        options = self.build_options(name, "echo 8888")
         plugin.add_watcher(name=name, cmd=cmd)
         plugin.circus_client.call.assert_called_with(options)
 
@@ -159,23 +130,7 @@ class ProcfileWatcherTest(TestCase):
         plugin.circus_client = Mock()
         name = "name"
         cmd = "echo $PORT"
-        options = json.dumps({
-            "command": "add",
-            "properties": {
-                "cmd": "echo 8888",
-                "name": name,
-                "args": [],
-                "options": {
-                    "env": {"port": "8888", "PORT": "8888"},
-                    "copy_env": True,
-                    "working_dir": "/home/application/current",
-                    "stderr_stream": {"class": "tsuru.stream.Stream"},
-                    "stdout_stream": {"class": "tsuru.stream.Stream"},
-                    "uid": "ubuntu",
-                },
-                "start": True,
-            },
-        })
+        options = self.build_options(name, "echo 8888")
         plugin.add_watcher(name=name, cmd=cmd)
         plugin.circus_client.call.assert_called_with(options)
 
@@ -185,23 +140,7 @@ class ProcfileWatcherTest(TestCase):
         plugin.circus_client = Mock()
         name = "name"
         cmd = "echo ${PORT}"
-        options = json.dumps({
-            "command": "add",
-            "properties": {
-                "cmd": "echo 8888",
-                "name": name,
-                "args": [],
-                "options": {
-                    "env": {"port": "8888", "PORT": "8888"},
-                    "copy_env": True,
-                    "working_dir": "/home/application/current",
-                    "stderr_stream": {"class": "tsuru.stream.Stream"},
-                    "stdout_stream": {"class": "tsuru.stream.Stream"},
-                    "uid": "ubuntu",
-                },
-                "start": True,
-            },
-        })
+        options = self.build_options(name, "echo 8888")
         plugin.add_watcher(name=name, cmd=cmd)
         plugin.circus_client.call.assert_called_with(options)
 
