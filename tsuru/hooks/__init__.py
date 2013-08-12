@@ -16,6 +16,7 @@ def run_commands(hook_name):
     for command in config[hook_name]:
         os.system(command)
 
+
 def before_start(*args, **kwargs):
     run_commands('pre-restart')
 
