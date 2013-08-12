@@ -26,3 +26,13 @@ class RunCommandsTest(TestCase):
         }
         run_commands('pre-restart')
         self.assertFalse(system.called)
+
+    @patch("tsuru.hooks.load_config")
+    @patch("os.system")
+    def test_run_commands_many_commands(self, system, load_config):
+        load_config.return_value = {
+            'pre-restart': ['testdata/pre.sh', 'testdata/pre2.sh'],
+        }
+        run_commands('pre-restart')
+        calls = [call("testdata/pre.sh"), call("testdata/pre2.sh")]
+        system.assert_has_calls(calls)
