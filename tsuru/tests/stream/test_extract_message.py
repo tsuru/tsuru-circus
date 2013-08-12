@@ -21,12 +21,18 @@ class ExtractMessageTestCase(unittest.TestCase):
         self.assertListEqual([expected], result)
 
     def test_extract_multiline(self):
-        msg = "2012-11-06 18:30:10 [13887] [INFO] Listening at: http://127.0.0.1:8000 (13887)\n2012-11-06 18:30:10 [13887] [INFO] Using worker: sync\n2012-11-06 18:30:10 [13890] [INFO] Booting worker with pid: 13890\n2012-11-06 18:30:10 [13890] [ERROR] Exception in worker process:\nTraceback (most recent call last):\n"
+        msg = "2012-11-06 18:30:10 [13887] [INFO] Listening at: " \
+              "http://127.0.0.1:8000 (13887)\n2012-11-06 18:30:10 [13887] " \
+              "[INFO] Using worker: sync\n2012-11-06 18:30:10 [13890] " \
+              "[INFO] Booting worker with pid: 13890\n2012-11-06 18:30:10 " \
+              "[13890] [ERROR] Exception in worker process:\nTraceback " \
+              "(most recent call last):\n"
         expected = [
             "Listening at: http://127.0.0.1:8000 (13887)\n",
             "Using worker: sync\n",
             "Booting worker with pid: 13890\n",
-            "Exception in worker process:\nTraceback (most recent call last):\n",
+            "Exception in worker process:\nTraceback "
+            "(most recent call last):\n",
         ]
         result = extract_message(msg)
         self.assertListEqual(expected, result)

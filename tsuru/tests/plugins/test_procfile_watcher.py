@@ -62,7 +62,8 @@ class ProcfileWatcherTest(TestCase):
 
     def test_commands_ignore_plugin(self):
         result = Mock()
-        result.return_value = {"statuses": {"plugin:tsuru-circus-ProcfileWatcher": "ok"}}
+        result.return_value = {"statuses":
+                               {"plugin:tsuru-circus-ProcfileWatcher": "ok"}}
         plugin = ProcfileWatcher("", "", 1)
         plugin.call = result
         procfile = Procfile('web: gunicorn -b 0.0.0.0:8080 abyss.wsgi\n')

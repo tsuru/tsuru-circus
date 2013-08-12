@@ -60,9 +60,11 @@ class ApprcWatcher(CircusPlugin):
         self.loop_rate = config.get("loop_rate", 3)  # in seconds
         self.apprc = config.get("apprc", "/home/application/apprc")
         self.port = config.get("port", "8888")
-        self.period = ioloop.PeriodicCallback(FileWatcher(self.apprc, self.reload_env),
-                                              self.loop_rate * 1000,
-                                              self.loop)
+        self.period = ioloop.PeriodicCallback(
+            FileWatcher(self.apprc, self.reload_env),
+            self.loop_rate * 1000,
+            self.loop
+        )
 
     def handle_init(self):
         self.period.start()
@@ -166,7 +168,8 @@ class ProcfileWatcher(CircusPlugin):
 
     def commands(self, procfile):
         cmds = self.call("status")["statuses"]
-        cmds_names = set([k for k in cmds.keys() if not k.startswith("plugin:")])
+        cmds_names = set([k for k in cmds.keys()
+                          if not k.startswith("plugin:")])
         new_cmds = set(procfile.commands.keys())
         to_remove = cmds_names.difference(new_cmds)
         to_add = new_cmds.difference(cmds_names)

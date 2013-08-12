@@ -43,4 +43,6 @@ class StreamTestCase(unittest.TestCase):
             stream = Stream()
             stream(self.data)
         except Exception as e:
-            self.fail("Should not fail when envs does not exist. Exception: %s" % e)
+            msg = "Should not fail when envs does not exist. " \
+                  "Exception: {}".format(e)
+            self.fail(msg)

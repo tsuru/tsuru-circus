@@ -31,7 +31,8 @@ class Stream(object):
 
     def load_envs(self):
         envs = common.load_envs(self.apprc)
-        return envs.get("TSURU_APPNAME"), envs.get("TSURU_HOST"), envs.get("TSURU_APP_TOKEN")
+        return (envs.get("TSURU_APPNAME"), envs.get("TSURU_HOST"),
+                envs.get("TSURU_APP_TOKEN"))
 
     def close(self):
         pass

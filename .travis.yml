@@ -3,7 +3,7 @@ install:
   - pip install flake8
 script:
   - python setup.py test
-  - flake8 --ignore=E501 tsuru
+  - flake8 tsuru
 notifications:
   irc:
     channels:

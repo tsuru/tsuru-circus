@@ -50,7 +50,8 @@ class ApprcWatcherTest(unittest.TestCase):
         self.addCleanup(remove_env, "SOMETHING_UNKNOWN")
         plugin = ApprcWatcher("", "", 1)
         plugin.call, kw = create_fake_call(None)
-        plugin.add_envs(name="name", envs={"foo": "bar", "SOMETHING_UNKNOWN": "456"})
+        plugin.add_envs(name="name", envs={"foo": "bar",
+                                           "SOMETHING_UNKNOWN": "456"})
         env = copy.deepcopy(os.environ)
         env["SOMETHING_UNKNOWN"] = "456"
         env["foo"] = "bar"
@@ -63,14 +64,6 @@ class ApprcWatcherTest(unittest.TestCase):
         envs["options"]["env"].update(os.environ)
         plugin.call, kw = create_fake_call(None, envs)
         plugin.add_envs(name="name", envs=NOPATH_OUTPUT["options"]["env"])
-        self.assertEqual([], kw)
-
-    def test_add_envs_dont_call_set_when_variables_dont_change_and_ses_os_environ(self):
-        plugin = ApprcWatcher("", "", 1)
-        envs = copy.deepcopy(NOPATH_OUTPUT)
-        envs["options"]["env"].update(os.environ)
-        plugin.call, kw = create_fake_call(None, envs)
-        plugin.add_envs(name="name", envs=envs["options"]["env"])
         self.assertEqual([], kw)
 
     def test_add_envs_override_environs(self):
@@ -99,7 +92,8 @@ class ApprcWatcherTest(unittest.TestCase):
     def test_add_env_doesnt_ignore_PYTHONPATH_from_apprc(self):
         plugin = ApprcWatcher("", "", 1)
         plugin.call, kw = create_fake_call(None)
-        plugin.add_envs(name="name", envs={"foo": "bar", "PYTHONPATH": "/usr/lib/python"})
+        plugin.add_envs(name="name", envs={"foo": "bar",
+                                           "PYTHONPATH": "/usr/lib/python"})
         env = copy.deepcopy(os.environ)
         env["foo"] = "bar"
         env["PYTHONPATH"] = "/usr/lib/python"
