@@ -6,9 +6,11 @@ import yaml
 import os
 
 
-def load_config(config_file):
-    with open(config_file) as f:
-        return yaml.load(f.read())
+def load_config():
+    files_name = ["app.yaml", "app.yml"]
+    for file_name in files_name:
+        with open(file_name) as f:
+            return yaml.load(f.read())
 
 
 def run_commands(hook_name):
