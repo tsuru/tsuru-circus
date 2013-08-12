@@ -14,6 +14,10 @@ def load_config():
                 return yaml.load(f.read())
         except IOError:
             pass
+    return {
+        'pre-restart': [],
+        'post-restart': [],
+    }
 
 
 def run_commands(hook_name):

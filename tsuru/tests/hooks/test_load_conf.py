@@ -39,3 +39,11 @@ post-restart:
         }
         self.assertDictEqual(config, expected)
         os.remove("app.yml")
+
+    def test_load_without_app_files(self):
+        config = load_config()
+        expected = {
+            'pre-restart': [],
+            'post-restart': [],
+        }
+        self.assertDictEqual(config, expected)
