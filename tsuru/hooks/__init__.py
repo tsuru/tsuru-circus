@@ -9,8 +9,11 @@ import os
 def load_config():
     files_name = ["app.yaml", "app.yml"]
     for file_name in files_name:
-        with open(file_name) as f:
-            return yaml.load(f.read())
+        try:
+            with open(file_name) as f:
+                return yaml.load(f.read())
+        except IOError:
+            pass
 
 
 def run_commands(hook_name):

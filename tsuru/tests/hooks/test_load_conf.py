@@ -16,9 +16,6 @@ pre-restart:
 post-restart:
   - testdata/pos.sh"""
 
-    def tearDown(self):
-        os.remove("app.yaml")
-
     def test_load_app_yaml(self):
         with open("app.yaml", "w") as f:
             f.write(self.data)
@@ -29,3 +26,16 @@ post-restart:
             'post-restart': ['testdata/pos.sh'],
         }
         self.assertDictEqual(config, expected)
+        os.remove("app.yaml")
+
+    def test_load_app_yml(self):
+        with open("app.yml", "w") as f:
+            f.write(self.data)
+        config = load_config()
+        expected = {
+            'hooks': None,
+            'pre-restart': ['testdata/pre.sh'],
+            'post-restart': ['testdata/pos.sh'],
+        }
+        self.assertDictEqual(config, expected)
+        os.remove("app.yml")
