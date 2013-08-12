@@ -11,13 +11,14 @@ def load_config(config_file):
         return yaml.load(f.read())
 
 
-def before_start(*args, **kwargs):
+def run_commands(hook_name):
     config = load_config()
-    for command in config['pre-restart']:
+    for command in config[hook_name]:
         os.system(command)
+
+def before_start(*args, **kwargs):
+    run_commands('pre-restart')
 
 
 def after_start(*args, **kwargs):
-    config = load_config()
-    for command in config['post-restart']:
-        os.system(command)
+    run_commands('post-restart')
