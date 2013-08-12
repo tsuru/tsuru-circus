@@ -15,3 +15,9 @@ def before_start(*args, **kwargs):
     config = load_config()
     for command in config['pre-restart']:
         os.system(command)
+
+
+def after_start(*args, **kwargs):
+    config = load_config()
+    for command in config['post-restart']:
+        os.system(command)
