@@ -3,27 +3,13 @@
 # license that can be found in the LICENSE file.
 
 from unittest import TestCase
-from mock import patch, call
+from mock import patch
 
 from tsuru.hooks import after_start
 
 
 class AfterStartTest(TestCase):
-    @patch("tsuru.hooks.load_config")
-    @patch("os.system")
-    def test_after_start(self, system, load_config):
-        load_config.return_value = {
-            'post-restart': ['testdata/post.sh'],
-        }
+    @patch("tsuru.hooks.run_commands")
+    def test_after_start(self, run_commands):
         after_start()
-        system.assert_called_with("testdata/post.sh")
-
-    @patch("tsuru.hooks.load_config")
-    @patch("os.system")
-    def test_after_start_many_commands(self, system, load_config):
-        load_config.return_value = {
-            'post-restart': ['testdata/post.sh', 'testdata/post2.sh'],
-        }
-        after_start()
-        calls = [call("testdata/post.sh"), call("testdata/post2.sh")]
-        system.assert_has_calls(calls)
+        run_commands.assert_called_with('post-restart')
