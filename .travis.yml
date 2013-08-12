@@ -1,9 +1,6 @@
 language: python
-install:
-  - pip install flake8
 script:
-  - python setup.py test
-  - flake8 tsuru
+  - make test
 notifications:
   irc:
     channels:
