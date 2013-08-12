@@ -13,4 +13,5 @@ def load_config(config_file):
 
 def before_start(*args, **kwargs):
     config = load_config()
-    os.system(config['pre-restart'][0])
+    for command in config['pre-restart']:
+        os.system(command)
