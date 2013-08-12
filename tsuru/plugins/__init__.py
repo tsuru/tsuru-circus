@@ -139,6 +139,10 @@ class ProcfileWatcher(CircusPlugin):
             "stderr_stream": self.stderr_stream,
             "stdout_stream": self.stdout_stream,
             "uid": self.uid,
+            "hooks": {
+                "before_start": "tsuru.hooks.before_start",
+                "after_start": "tsuru.hooks.after_start",
+            }
         }
         self.circus_client.call(json.dumps({
             "command": "add",
