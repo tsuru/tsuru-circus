@@ -134,12 +134,15 @@ class ProcfileWatcher(CircusPlugin):
         env = {"port": self.port, "PORT": self.port}
         env.update(common.load_envs(self.apprc))
         cmd = replace_args(cmd, **env)
+        stderr_stream = self.stderr_stream.copy()
+        stdout_stream = self.stdout_stream.copy()
+        stdout_stream["watcher_name"] = stderr_stream["watcher_name"] = name
         options = {
             "env": env,
             "copy_env": True,
             "working_dir": self.working_dir,
-            "stderr_stream": self.stderr_stream,
-            "stdout_stream": self.stdout_stream,
+            "stderr_stream": stderr_stream,
+            "stdout_stream": stdout_stream,
             "uid": self.uid,
             "hooks": {
                 "before_start": "tsuru.hooks.before_start",

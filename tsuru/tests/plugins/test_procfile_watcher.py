@@ -24,8 +24,14 @@ class ProcfileWatcherTest(TestCase):
                     "env": {"port": "8888", "PORT": "8888"},
                     "copy_env": True,
                     "working_dir": "/home/application/current",
-                    "stderr_stream": {"class": "tsuru.stream.Stream"},
-                    "stdout_stream": {"class": "tsuru.stream.Stream"},
+                    "stderr_stream": {
+                        "class": "tsuru.stream.Stream",
+                        "watcher_name": name
+                    },
+                    "stdout_stream": {
+                        "class": "tsuru.stream.Stream",
+                        "watcher_name": name
+                    },
                     "uid": "ubuntu",
                     "hooks": {'before_start': "tsuru.hooks.before_start",
                               'after_start': "tsuru.hooks.after_start"},
