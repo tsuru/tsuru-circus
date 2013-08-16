@@ -27,8 +27,10 @@ class ProcfileWatcherTest(TestCase):
                     "stderr_stream": {"class": "tsuru.stream.Stream"},
                     "stdout_stream": {"class": "tsuru.stream.Stream"},
                     "uid": "ubuntu",
-                    "hooks.before_start": "tsuru.hooks.before_start",
-                    "hooks.after_start": "tsuru.hooks.after_start",
+                    "hooks": {
+                        "before_start": ["tsuru.hooks.before_start", False],
+                        "after_start": ["tsuru.hooks.after_start", False],
+                    }
                 },
                 "start": True,
             },
