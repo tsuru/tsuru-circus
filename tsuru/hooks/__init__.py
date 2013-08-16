@@ -15,14 +15,16 @@ def load_config():
         except IOError:
             pass
     return {
-        'pre-restart': [],
-        'post-restart': [],
+        'hooks': {
+            'pre-restart': [],
+            'post-restart': [],
+        }
     }
 
 
 def run_commands(hook_name):
     config = load_config()
-    for command in config[hook_name]:
+    for command in config['hooks'][hook_name]:
         os.system(command)
 
 
