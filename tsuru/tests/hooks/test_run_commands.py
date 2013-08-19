@@ -54,4 +54,4 @@ class RunCommandsTest(TestCase):
         check_output.return_value = "ble"
         stream = Stream.return_value
         run_commands('pre-restart')
-        stream.assert_called_with("ble")
+        stream.assert_called_with({"data": "ble"})

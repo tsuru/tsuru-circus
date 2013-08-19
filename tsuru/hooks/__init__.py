@@ -27,7 +27,7 @@ def run_commands(hook_name):
     for command in config['hooks'][hook_name]:
         result = subprocess.check_output([command], shell=True)
         from tsuru.stream import Stream
-        Stream()(result)
+        Stream()({"data": result})
 
 
 def before_start(*args, **kwargs):
