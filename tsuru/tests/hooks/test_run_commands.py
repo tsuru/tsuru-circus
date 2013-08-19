@@ -4,13 +4,17 @@
 
 from unittest import TestCase
 from mock import patch, call, Mock
+import os
+import subprocess
 
 from tsuru.hooks import run_commands
 
 
 class RunCommandsTest(TestCase):
     def setUp(self):
-        self.watcher = Mock(name="somename")
+        working_dir = os.path.dirname(__file__)
+        self.watcher = Mock(name="somename", working_dir=working_dir)
+        self.cd = "cd {}".format(working_dir)
 
     @patch("tsuru.hooks.load_config")
     @patch("subprocess.check_output")
@@ -21,7 +25,8 @@ class RunCommandsTest(TestCase):
             }
         }
         run_commands('pre-restart', watcher=self.watcher)
-        check_output.assert_called_with(["testdata/pre.sh"], shell=True)
+        check_output.assert_called_with([self.cd, "testdata/pre.sh"],
+                                        stderr=subprocess.STDOUT, shell=True)
 
     @patch("tsuru.hooks.load_config")
     @patch("subprocess.check_output")
@@ -41,8 +46,10 @@ class RunCommandsTest(TestCase):
             }
         }
         run_commands('pre-restart', watcher=self.watcher)
-        calls = [call(["testdata/pre.sh"], shell=True),
-                 call(["testdata/pre2.sh"], shell=True)]
+        calls = [call([self.cd, "testdata/pre.sh"], stderr=subprocess.STDOUT,
+                      shell=True),
+                 call([self.cd, "testdata/pre2.sh"], stderr=subprocess.STDOUT,
+                      shell=True)]
         check_output.assert_has_calls(calls)
 
     @patch("tsuru.hooks.load_config")
@@ -59,21 +66,4 @@ class RunCommandsTest(TestCase):
         run_commands('pre-restart', watcher=self.watcher)
         calls = [call({"data": " ---> Running pre-restart"}),
                  call({"data": "ble"})]
-        stream.assert_has_calls(calls)
-
-    @patch("tsuru.hooks.load_config")
-    @patch("tsuru.stream.Stream")
-    def test_run_commands_that_returns_errors(self, Stream, load_config):
-        load_config.return_value = {
-            'hooks': {
-                'pre-restart': ['exit 1'],
-            }
-        }
-        stream = Stream.return_value
-        run_commands('pre-restart', watcher=self.watcher)
-        calls = [
-            call({"data": " ---> Running pre-restart"}),
-            call({'data':
-                  "Command '['exit 1']' returned non-zero exit status 1"})
-        ]
         stream.assert_has_calls(calls)

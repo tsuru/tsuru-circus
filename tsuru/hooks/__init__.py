@@ -30,11 +30,10 @@ def run_commands(name, **kwargs):
     watcher = kwargs.get("watcher")
     Stream(watcher_name=watcher.name)(
         {"data": " ---> Running {}".format(name)})
+    cd = "cd {}".format(watcher.working_dir)
     for command in config['hooks'][name]:
-        try:
-            result = subprocess.check_output([command], shell=True)
-        except subprocess.CalledProcessError as e:
-            result = str(e)
+        result = subprocess.check_output([cd, command],
+                                         stderr=subprocess.STDOUT, shell=True)
         Stream(watcher_name=watcher.name)({"data": result})
 
 
