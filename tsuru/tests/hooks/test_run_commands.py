@@ -24,7 +24,7 @@ class RunCommandsTest(TestCase):
     @patch("subprocess.check_output")
     def test_run_commands_without_config(self, check_output, load_config):
         load_config.return_value = {
-            'hooks': {'pre-restart': [],}
+            'hooks': {'pre-restart': []}
         }
         run_commands('pre-restart')
         self.assertFalse(check_output.called)
@@ -38,5 +38,6 @@ class RunCommandsTest(TestCase):
             }
         }
         run_commands('pre-restart')
-        calls = [call(["testdata/pre.sh"], shell=True), call(["testdata/pre2.sh"], shell=True)]
+        calls = [call(["testdata/pre.sh"], shell=True),
+                 call(["testdata/pre2.sh"], shell=True)]
         check_output.assert_has_calls(calls)

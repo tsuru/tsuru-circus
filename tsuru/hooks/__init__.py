@@ -25,7 +25,7 @@ def load_config():
 def run_commands(hook_name):
     config = load_config()
     for command in config['hooks'][hook_name]:
-        result = subprocess.check_output([command], shell=True)
+        subprocess.check_output([command], shell=True)
 
 
 def before_start(*args, **kwargs):
