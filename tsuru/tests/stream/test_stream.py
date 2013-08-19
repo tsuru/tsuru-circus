@@ -18,7 +18,7 @@ class StreamTestCase(unittest.TestCase):
             'data': l,
             'name': 'stderr'
         }
-        self.stream = Stream()
+        self.stream = Stream(watcher_name='mywatcher')
         self.stream.apprc = os.path.join(os.path.dirname(__file__),
                                          "testdata/apprc")
 
@@ -30,7 +30,7 @@ class StreamTestCase(unittest.TestCase):
         post.return_value = mock.Mock(status_code=200)
         self.stream(self.data)
         appname, host, token = self.stream.load_envs()
-        url = "{0}/apps/{1}/log".format(host, appname)
+        url = "{0}/apps/{1}/log?source=mywatcher".format(host, appname)
         expected_msg = "Starting gunicorn 0.15.0\n"
         expected_data = json.dumps([expected_msg])
         post.assert_called_with(url, data=expected_data,

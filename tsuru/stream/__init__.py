@@ -20,11 +20,13 @@ class Stream(object):
 
     def __init__(self, **kwargs):
         self.apprc = "/home/application/apprc"
+        self.watcher_name = kwargs.get("watcher_name", "")
 
     def __call__(self, data):
         appname, host, token = self.load_envs()
         if appname and host and token:
-            url = "{0}/apps/{1}/log".format(host, appname)
+            url = "{0}/apps/{1}/log?source={2}".format(host, appname,
+                                                       self.watcher_name)
             messages = extract_message(data["data"])
             requests.post(url, data=json.dumps(messages),
                           headers={"Authorization": "bearer " + token})
