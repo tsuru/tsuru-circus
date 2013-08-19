@@ -25,7 +25,9 @@ def load_config():
 def run_commands(hook_name):
     config = load_config()
     for command in config['hooks'][hook_name]:
-        subprocess.check_output([command], shell=True)
+        result = subprocess.check_output([command], shell=True)
+        from tsuru.stream import Stream
+        Stream()(result)
 
 
 def before_start(*args, **kwargs):

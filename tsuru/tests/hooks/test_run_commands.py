@@ -41,3 +41,17 @@ class RunCommandsTest(TestCase):
         calls = [call(["testdata/pre.sh"], shell=True),
                  call(["testdata/pre2.sh"], shell=True)]
         check_output.assert_has_calls(calls)
+
+    @patch("tsuru.hooks.load_config")
+    @patch("subprocess.check_output")
+    @patch("tsuru.stream.Stream")
+    def test_run_commands_should_log(self, Stream, check_output, load_config):
+        load_config.return_value = {
+            'hooks': {
+                'pre-restart': ['testdata/pre.sh'],
+            }
+        }
+        check_output.return_value = "ble"
+        stream = Stream.return_value
+        run_commands('pre-restart')
+        stream.assert_called_with("ble")
