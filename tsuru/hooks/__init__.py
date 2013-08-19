@@ -22,17 +22,19 @@ def load_config():
     }
 
 
-def run_commands(hook_name):
+def run_commands(hook_name, **kwargs):
     config = load_config()
+    watcher_name = kwargs.get("watcher_name", "")
     for command in config['hooks'][hook_name]:
         result = subprocess.check_output([command], shell=True)
         from tsuru.stream import Stream
-        Stream()({"data": " ---> Running {}".format(hook_name)})
-        Stream()({"data": result})
+        Stream(watcher_name=watcher_name)(
+            {"data": " ---> Running {}".format(hook_name)})
+        Stream(watcher_name=watcher_name)({"data": result})
 
 
 def before_start(*args, **kwargs):
-    run_commands('pre-restart')
+    run_commands('pre-restart', **kwargs)
 
 
 def after_start(*args, **kwargs):
