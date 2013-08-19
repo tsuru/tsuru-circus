@@ -3,7 +3,7 @@
 # license that can be found in the LICENSE file.
 
 import yaml
-import os
+import subprocess
 
 
 def load_config():
@@ -25,7 +25,7 @@ def load_config():
 def run_commands(hook_name):
     config = load_config()
     for command in config['hooks'][hook_name]:
-        os.system(command)
+        result = subprocess.check_output([command], shell=True)
 
 
 def before_start(*args, **kwargs):
