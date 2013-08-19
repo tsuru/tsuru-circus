@@ -22,14 +22,14 @@ def load_config():
     }
 
 
-def run_commands(hook_name, **kwargs):
+def run_commands(name, **kwargs):
     config = load_config()
     watcher = kwargs.get("watcher", "")
-    for command in config['hooks'][hook_name]:
+    for command in config['hooks'][name]:
         result = subprocess.check_output([command], shell=True)
         from tsuru.stream import Stream
         Stream(watcher_name=watcher.name)(
-            {"data": " ---> Running {}".format(hook_name)})
+            {"data": " ---> Running {}".format(name)})
         Stream(watcher_name=watcher.name)({"data": result})
 
 
