@@ -25,13 +25,16 @@ def load_config(**kwargs):
 
 
 def run_commands(name, **kwargs):
+    from tsuru.stream import Stream
     config = load_config(**kwargs)
     watcher = kwargs.get("watcher")
+    Stream(watcher_name=watcher.name)(
+        {"data": " ---> Running {}".format(name)})
     for command in config['hooks'][name]:
-        result = subprocess.check_output([command], shell=True)
-        from tsuru.stream import Stream
-        Stream(watcher_name=watcher.name)(
-            {"data": " ---> Running {}".format(name)})
+        try:
+            result = subprocess.check_output([command], shell=True)
+        except subprocess.CalledProcessError as e:
+            result = str(e)
         Stream(watcher_name=watcher.name)({"data": result})
 
 

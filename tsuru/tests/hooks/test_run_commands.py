@@ -60,3 +60,20 @@ class RunCommandsTest(TestCase):
         calls = [call({"data": " ---> Running pre-restart"}),
                  call({"data": "ble"})]
         stream.assert_has_calls(calls)
+
+    @patch("tsuru.hooks.load_config")
+    @patch("tsuru.stream.Stream")
+    def test_run_commands_that_returns_errors(self, Stream, load_config):
+        load_config.return_value = {
+            'hooks': {
+                'pre-restart': ['exit 1'],
+            }
+        }
+        stream = Stream.return_value
+        run_commands('pre-restart', watcher=self.watcher)
+        calls = [
+            call({"data": " ---> Running pre-restart"}),
+            call({'data':
+                  "Command '['exit 1']' returned non-zero exit status 1"})
+        ]
+        stream.assert_has_calls(calls)
