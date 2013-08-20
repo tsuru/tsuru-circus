@@ -49,10 +49,5 @@ class LoadConfTest(TestCase):
 
     def test_load_without_app_files(self):
         config = load_config(watcher=self.watcher)
-        expected = {
-            'hooks': {
-                'pre-restart': [],
-                'post-restart': [],
-            }
-        }
+        expected = {}
         self.assertDictEqual(config, expected)

@@ -16,12 +16,7 @@ def load_config(**kwargs):
                 return yaml.load(f.read())
         except IOError:
             pass
-    return {
-        'hooks': {
-            'pre-restart': [],
-            'post-restart': [],
-        }
-    }
+    return {}
 
 
 def run_commands(name, **kwargs):
