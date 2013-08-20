@@ -74,3 +74,16 @@ class RunCommandsTest(TestCase):
     def test_should_return_true(self, Stream, check_output, load_config):
         result = run_commands('pre-restart', watcher=self.watcher)
         self.assertTrue(result)
+
+    @patch("tsuru.hooks.load_config")
+    @patch("subprocess.check_output")
+    @patch("tsuru.stream.Stream")
+    def test_run_commands_config_without_a_hook(self, Stream,
+                                                check_output, load_config):
+        load_config.return_value = {
+            'hooks': {
+                'pre-restart': ['testdata/pre.sh'],
+            }
+        }
+        stream = Stream.return_value
+        run_commands('post-restart', watcher=self.watcher)

@@ -31,7 +31,7 @@ def run_commands(name, **kwargs):
     Stream(watcher_name=watcher.name)(
         {"data": " ---> Running {}".format(name)})
     cd = "cd {}".format(watcher.working_dir)
-    for command in config['hooks'][name]:
+    for command in config['hooks'].get(name, []):
         result = subprocess.check_output([cd, command],
                                          stderr=subprocess.STDOUT, shell=True)
         Stream(watcher_name=watcher.name)({"data": result})
@@ -43,4 +43,4 @@ def before_start(*args, **kwargs):
 
 
 def after_start(*args, **kwargs):
-    return run_commands('post-restart')
+    return run_commands('post-restart', **kwargs)
