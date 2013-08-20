@@ -14,7 +14,6 @@ class RunCommandsTest(TestCase):
     def setUp(self):
         working_dir = os.path.dirname(__file__)
         self.watcher = Mock(name="somename", working_dir=working_dir)
-        self.cd = "cd {}".format(working_dir)
 
     @patch("tsuru.hooks.load_config")
     @patch("subprocess.check_output")
@@ -25,7 +24,7 @@ class RunCommandsTest(TestCase):
             }
         }
         run_commands('pre-restart', watcher=self.watcher)
-        check_output.assert_called_with([self.cd, "testdata/pre.sh"],
+        check_output.assert_called_with(["testdata/pre.sh"],
                                         stderr=subprocess.STDOUT, shell=True)
 
     @patch("tsuru.hooks.load_config")
@@ -46,9 +45,9 @@ class RunCommandsTest(TestCase):
             }
         }
         run_commands('pre-restart', watcher=self.watcher)
-        calls = [call([self.cd, "testdata/pre.sh"], stderr=subprocess.STDOUT,
+        calls = [call(["testdata/pre.sh"], stderr=subprocess.STDOUT,
                       shell=True),
-                 call([self.cd, "testdata/pre2.sh"], stderr=subprocess.STDOUT,
+                 call(["testdata/pre2.sh"], stderr=subprocess.STDOUT,
                       shell=True)]
         check_output.assert_has_calls(calls)
 
