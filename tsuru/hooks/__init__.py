@@ -31,7 +31,8 @@ def run_commands(name, **kwargs):
     Stream(watcher_name=watcher.name)(
         {"data": " ---> Running {}".format(name)})
     cd = "cd {}".format(watcher.working_dir)
-    for command in config['hooks'].get(name, []):
+    hooks = config.get('hooks', {})
+    for command in hooks.get(name, []):
         result = subprocess.check_output([cd, command],
                                          stderr=subprocess.STDOUT, shell=True)
         Stream(watcher_name=watcher.name)({"data": result})
