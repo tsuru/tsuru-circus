@@ -15,4 +15,3 @@ class AfterStartTest(TestCase):
         result = after_start()
         run_commands.assert_called_with('post-restart')
         self.assertTrue(result)
-

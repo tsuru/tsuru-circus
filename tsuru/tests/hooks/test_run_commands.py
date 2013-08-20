@@ -84,7 +84,6 @@ class RunCommandsTest(TestCase):
                 'pre-restart': ['testdata/pre.sh'],
             }
         }
-        stream = Stream.return_value
         run_commands('post-restart', watcher=self.watcher)
 
     @patch("tsuru.hooks.load_config")
@@ -93,5 +92,4 @@ class RunCommandsTest(TestCase):
     def test_run_commands_config_without_hooks(self, Stream,
                                                check_output, load_config):
         load_config.return_value = {}
-        stream = Stream.return_value
         run_commands('post-restart', watcher=self.watcher)
