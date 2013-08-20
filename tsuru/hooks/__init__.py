@@ -27,8 +27,12 @@ def run_commands(name, **kwargs):
         {"data": " ---> Running {}".format(name)})
     hooks = config.get('hooks', {})
     for command in hooks.get(name, []):
-        result = subprocess.check_output([command],
-                                         stderr=subprocess.STDOUT, shell=True)
+        try:
+            result = subprocess.check_output([command],
+                                             stderr=subprocess.STDOUT,
+                                             shell=True)
+        except subprocess.CalledProcessError as e:
+            result = str(e)
         Stream(watcher_name=watcher.name)({"data": result})
     return True
 
