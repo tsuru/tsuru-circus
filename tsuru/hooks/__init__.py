@@ -23,10 +23,11 @@ def run_commands(name, **kwargs):
     from tsuru.stream import Stream
     config = load_config(**kwargs)
     watcher = kwargs.get("watcher")
-    Stream(watcher_name=watcher.name)(
-        {"data": " ---> Running {}".format(name)})
-    hooks = config.get('hooks', {})
-    for command in hooks.get(name, []):
+    cmds = config.get('hooks', {}).get(name, [])
+    if cmds:
+        Stream(watcher_name=watcher.name)(
+            {"data": " ---> Running {}".format(name)})
+    for command in cmds:
         try:
             result = subprocess.check_output([command],
                                              stderr=subprocess.STDOUT,

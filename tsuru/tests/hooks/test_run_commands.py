@@ -110,3 +110,15 @@ class RunCommandsTest(TestCase):
                   "Command '['exit 1']' returned non-zero exit status 1"})
         ]
         stream.assert_has_calls(calls)
+
+    @patch("tsuru.hooks.load_config")
+    @patch("tsuru.stream.Stream")
+    def test_log_only_when_the_commands_is_executed(self, Stream, load_config):
+        load_config.return_value = {
+            'hooks': {
+                'pre-restart': ['ps -ef'],
+            }
+        }
+        stream = Stream.return_value
+        run_commands('post-restart', watcher=self.watcher)
+        self.assertFalse(stream.called)
