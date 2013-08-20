@@ -11,5 +11,8 @@ from tsuru.hooks import after_start
 class AfterStartTest(TestCase):
     @patch("tsuru.hooks.run_commands")
     def test_after_start(self, run_commands):
-        after_start()
+        run_commands.return_value = True
+        result = after_start()
         run_commands.assert_called_with('post-restart')
+        self.assertTrue(result)
+

@@ -35,11 +35,12 @@ def run_commands(name, **kwargs):
         result = subprocess.check_output([cd, command],
                                          stderr=subprocess.STDOUT, shell=True)
         Stream(watcher_name=watcher.name)({"data": result})
+    return True
 
 
 def before_start(*args, **kwargs):
-    run_commands('pre-restart', **kwargs)
+    return run_commands('pre-restart', **kwargs)
 
 
 def after_start(*args, **kwargs):
-    run_commands('post-restart')
+    return run_commands('post-restart')

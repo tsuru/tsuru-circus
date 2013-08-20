@@ -11,5 +11,7 @@ from tsuru.hooks import before_start
 class BeforeStartTest(TestCase):
     @patch("tsuru.hooks.run_commands")
     def test_before_start(self, run_commands):
-        before_start()
+        run_commands.return_value = True
+        result = before_start()
         run_commands.assert_called_with('pre-restart')
+        self.assertTrue(result)

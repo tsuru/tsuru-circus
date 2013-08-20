@@ -67,3 +67,10 @@ class RunCommandsTest(TestCase):
         calls = [call({"data": " ---> Running pre-restart"}),
                  call({"data": "ble"})]
         stream.assert_has_calls(calls)
+
+    @patch("tsuru.hooks.load_config")
+    @patch("subprocess.check_output")
+    @patch("tsuru.stream.Stream")
+    def test_should_return_true(self, Stream, check_output, load_config):
+        result = run_commands('pre-restart', watcher=self.watcher)
+        self.assertTrue(result)
