@@ -167,6 +167,8 @@ class ProcfileWatcher(CircusPlugin):
 
     def commands(self, procfile):
         cmds = self.call("status")["statuses"]
+        if "tsuru-hooks" in cmds:
+            del cmds["tsuru-hooks"]
         cmds_names = set([k for k in cmds.keys()
                           if not k.startswith("plugin:")])
         new_cmds = set(procfile.commands.keys())

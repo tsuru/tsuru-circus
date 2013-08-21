@@ -164,3 +164,12 @@ class ProcfileWatcherTest(TestCase):
         plugin.call.assert_called_with('set',
                                        options={'cmd': 'echo 8888 bla'},
                                        name=name)
+
+    def test_commands_dont_remove_tsuru_hooks_watcher(self):
+        plugin = ProcfileWatcher("", "", 1)
+        result = Mock()
+        result.return_value = {"statuses": {"tsuru-hooks": ""}}
+        plugin.call = result
+        procfile = Procfile('web: gunicorn -b 0.0.0.0:8080 abyss.wsgi\n')
+        to_add, to_remove, to_change = plugin.commands(procfile)
+        self.assertNotIn("tsuru-hooks", to_remove)
