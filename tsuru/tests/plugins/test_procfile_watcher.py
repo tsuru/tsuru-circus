@@ -33,10 +33,6 @@ class ProcfileWatcherTest(TestCase):
                         "watcher_name": name
                     },
                     "uid": "ubuntu",
-                    "hooks": {
-                        "before_start": ["tsuru.hooks.before_start", False],
-                        "after_start": ["tsuru.hooks.after_start", False],
-                    }
                 },
                 "start": True,
             },
