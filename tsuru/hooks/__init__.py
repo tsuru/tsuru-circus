@@ -32,9 +32,10 @@ def run_commands(name, **kwargs):
             result = subprocess.check_output([command],
                                              stderr=subprocess.STDOUT,
                                              shell=True)
+            Stream(watcher_name=watcher.name)({"data": result})
         except subprocess.CalledProcessError as e:
-            result = str(e)
-        Stream(watcher_name=watcher.name)({"data": result})
+            Stream(watcher_name=watcher.name)({"data": str(e)})
+            Stream(watcher_name=watcher.name)({"data": e.output})
     return True
 
 
