@@ -29,7 +29,8 @@ def run_commands(name, **kwargs):
             {"data": " ---> Running {}".format(name)})
     for command in cmds:
         try:
-            result = subprocess.check_output([command],
+            cmd = "cd {} && {}".format(watcher.working_dir, command)
+            result = subprocess.check_output([cmd],
                                              stderr=subprocess.STDOUT,
                                              shell=True)
             Stream(watcher_name=watcher.name)({"data": result})

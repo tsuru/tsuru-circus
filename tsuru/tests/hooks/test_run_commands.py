@@ -15,6 +15,9 @@ class RunCommandsTest(TestCase):
         working_dir = os.path.dirname(__file__)
         self.watcher = Mock(name="somename", working_dir=working_dir)
 
+    def cmd(self, command):
+        return "cd {} && {}".format(self.watcher.working_dir, command)
+
     @patch("tsuru.hooks.load_config")
     @patch("subprocess.check_output")
     def test_run_commands_with_config(self, check_output, load_config):
@@ -24,7 +27,7 @@ class RunCommandsTest(TestCase):
             }
         }
         run_commands('pre-restart', watcher=self.watcher)
-        check_output.assert_called_with(["testdata/pre.sh"],
+        check_output.assert_called_with([self.cmd("testdata/pre.sh")],
                                         stderr=subprocess.STDOUT, shell=True)
 
     @patch("tsuru.hooks.load_config")
@@ -45,9 +48,9 @@ class RunCommandsTest(TestCase):
             }
         }
         run_commands('pre-restart', watcher=self.watcher)
-        calls = [call(["testdata/pre.sh"], stderr=subprocess.STDOUT,
+        calls = [call([self.cmd("testdata/pre.sh")], stderr=subprocess.STDOUT,
                       shell=True),
-                 call(["testdata/pre2.sh"], stderr=subprocess.STDOUT,
+                 call([self.cmd("testdata/pre2.sh")], stderr=subprocess.STDOUT,
                       shell=True)]
         check_output.assert_has_calls(calls)
 
@@ -104,10 +107,12 @@ class RunCommandsTest(TestCase):
         }
         stream = Stream.return_value
         run_commands('pre-restart', watcher=self.watcher)
+        cmd = self.cmd('exit 1')
         calls = [
             call({"data": " ---> Running pre-restart"}),
             call({'data':
-                  "Command '['exit 1']' returned non-zero exit status 1"})
+                  "Command '['{}']' returned non-zero exit status 1".format(
+                      cmd)})
         ]
         stream.assert_has_calls(calls)
 
