@@ -33,6 +33,7 @@ class ProcfileWatcherTest(TestCase):
                         "watcher_name": name
                     },
                     "uid": "ubuntu",
+                    "priority": 2,
                 },
                 "start": True,
             },
