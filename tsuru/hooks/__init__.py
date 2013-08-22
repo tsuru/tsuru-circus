@@ -29,8 +29,8 @@ def run_commands(name, **kwargs):
             {"data": " ---> Running {}".format(name)})
     for command in cmds:
         try:
-            cmd = "source /home/application/apprc && "
-            cmd += "cd {} && {}".format(watcher.working_dir, command)
+            cmd = "/bin/bash -c 'source /home/application/apprc && "
+            cmd += "cd {} && {}'".format(watcher.working_dir, command)
             result = subprocess.check_output([cmd],
                                              stderr=subprocess.STDOUT,
                                              shell=True)

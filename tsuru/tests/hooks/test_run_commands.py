@@ -16,9 +16,9 @@ class RunCommandsTest(TestCase):
         self.watcher = Mock(name="somename", working_dir=working_dir)
 
     def cmd(self, command):
-        source = "source /home/application/apprc &&"
-        return "{} cd {} && {}".format(source, self.watcher.working_dir,
-                                       command)
+        source = "/bin/bash -c 'source /home/application/apprc &&"
+        return "{} cd {} && {}'".format(source, self.watcher.working_dir,
+                                        command)
 
     @patch("tsuru.hooks.load_config")
     @patch("subprocess.check_output")
@@ -100,21 +100,22 @@ class RunCommandsTest(TestCase):
         run_commands('post-restart', watcher=self.watcher)
 
     @patch("tsuru.hooks.load_config")
+    @patch("subprocess.check_output")
     @patch("tsuru.stream.Stream")
-    def test_run_commands_that_returns_errors(self, Stream, load_config):
+    def test_run_commands_that_returns_errors(self, Stream,
+                                              check_output, load_config):
         load_config.return_value = {
             'hooks': {
                 'pre-restart': ['exit 1'],
             }
         }
         stream = Stream.return_value
+        check_output.side_effect = subprocess.CalledProcessError(1, "cmd")
         run_commands('pre-restart', watcher=self.watcher)
-        cmd = self.cmd('exit 1')
         calls = [
-            call({"data": " ---> Running pre-restart"}),
-            call({'data':
-                  "Command '['{}']' returned non-zero exit status 1".format(
-                      cmd)})
+            call({'data': ' ---> Running pre-restart'}),
+            call({'data': "Command 'cmd' returned non-zero exit status 1"}),
+            call({'data': None})
         ]
         stream.assert_has_calls(calls)
 
