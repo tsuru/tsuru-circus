@@ -144,7 +144,6 @@ class ProcfileWatcher(CircusPlugin):
             "stderr_stream": stderr_stream,
             "stdout_stream": stdout_stream,
             "uid": self.uid,
-            "priority": 2,
         }
         self.circus_client.call(json.dumps({
             "command": "add",
@@ -154,6 +153,7 @@ class ProcfileWatcher(CircusPlugin):
                 "args": [],
                 "options": options,
                 "start": True,
+                "priority": 2,
             },
         }))
 
