@@ -16,9 +16,9 @@ class RunCommandsTest(TestCase):
         self.watcher = Mock(name="somename", working_dir=working_dir)
 
     def cmd(self, command):
-        source = '/bin/bash -c "source /home/application/apprc &&'
-        return '{} cd {} && {}"'.format(source, self.watcher.working_dir,
-                                        command)
+        cmd = "source /home/application/apprc && cd {} && {}"
+        return ["/bin/bash", "-c",
+                cmd.format(self.watcher.working_dir, command)]
 
     @patch("tsuru.hooks.load_config")
     @patch("subprocess.check_output")
@@ -29,8 +29,8 @@ class RunCommandsTest(TestCase):
             }
         }
         run_commands('pre-restart', watcher=self.watcher)
-        check_output.assert_called_with([self.cmd("testdata/pre.sh")],
-                                        stderr=subprocess.STDOUT, shell=True)
+        check_output.assert_called_with(self.cmd("testdata/pre.sh"),
+                                        stderr=subprocess.STDOUT)
 
     @patch("tsuru.hooks.load_config")
     @patch("subprocess.check_output")
@@ -50,10 +50,8 @@ class RunCommandsTest(TestCase):
             }
         }
         run_commands('pre-restart', watcher=self.watcher)
-        calls = [call([self.cmd("testdata/pre.sh")], stderr=subprocess.STDOUT,
-                      shell=True),
-                 call([self.cmd("testdata/pre2.sh")], stderr=subprocess.STDOUT,
-                      shell=True)]
+        calls = [call(self.cmd("testdata/pre.sh"), stderr=subprocess.STDOUT),
+                 call(self.cmd("testdata/pre2.sh"), stderr=subprocess.STDOUT)]
         check_output.assert_has_calls(calls)
 
     @patch("tsuru.hooks.load_config")

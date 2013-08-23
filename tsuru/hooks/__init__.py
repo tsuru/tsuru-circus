@@ -29,11 +29,11 @@ def run_commands(name, **kwargs):
             {"data": " ---> Running {}".format(name)})
     for command in cmds:
         try:
-            cmd = '/bin/bash -c "source /home/application/apprc && '
-            cmd += 'cd {} && {}"'.format(watcher.working_dir, command)
-            result = subprocess.check_output([cmd],
-                                             stderr=subprocess.STDOUT,
-                                             shell=True)
+            commands = ["/bin/bash", "-c"]
+            cmd = "source /home/application/apprc && cd {} && {}"
+            commands.append(cmd.format(watcher.working_dir, command))
+            result = subprocess.check_output(commands,
+                                             stderr=subprocess.STDOUT)
             Stream(watcher_name=watcher.name)({"data": result})
         except subprocess.CalledProcessError as e:
             Stream(watcher_name=watcher.name)({"data": str(e)})
