@@ -16,8 +16,8 @@ class RunCommandsTest(TestCase):
         self.watcher = Mock(name="somename", working_dir=working_dir)
 
     def cmd(self, command):
-        source = "/bin/bash -c 'source /home/application/apprc &&"
-        return "{} cd {} && {}'".format(source, self.watcher.working_dir,
+        source = '/bin/bash -c "source /home/application/apprc &&'
+        return '{} cd {} && {}"'.format(source, self.watcher.working_dir,
                                         command)
 
     @patch("tsuru.hooks.load_config")
