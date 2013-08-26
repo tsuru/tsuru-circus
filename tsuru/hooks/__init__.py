@@ -22,15 +22,16 @@ def load_config(**kwargs):
 
 
 def set_uid(watcher):
-    uid = pwd.getpwnam(watcher.uid).pw_uid
-    os.setuid(uid)
+    def fn():
+        uid = pwd.getpwnam(watcher.uid).pw_uid
+        os.setuid(uid)
+    return fn
 
 
 def run_commands(name, **kwargs):
     from tsuru.stream import Stream
     config = load_config(**kwargs)
     watcher = kwargs.get("watcher")
-    set_uid(watcher)
     cmds = config.get('hooks', {}).get(name, [])
     if cmds:
         Stream(watcher_name=watcher.name)(
@@ -38,10 +39,12 @@ def run_commands(name, **kwargs):
     for command in cmds:
         try:
             commands = ["/bin/bash", "-c"]
-            cmd = "source /home/application/apprc && cd {} && {}"
-            commands.append(cmd.format(watcher.working_dir, command))
+            cmd = "source /home/application/apprc && {}"
+            commands.append(cmd.format(command))
             result = subprocess.check_output(commands,
-                                             stderr=subprocess.STDOUT)
+                                             stderr=subprocess.STDOUT,
+                                             cwd=watcher.working_dir,
+                                             preexec_fn=set_uid(watcher))
             Stream(watcher_name=watcher.name)({"data": result})
         except subprocess.CalledProcessError as e:
             Stream(watcher_name=watcher.name)({"data": str(e)})

@@ -23,6 +23,7 @@ class SetUIDTestCase(unittest.TestCase):
         watcher = Bag()
         watcher.uid = "ubuntu"
         getpwnam.return_value = passwd
-        set_uid(watcher)
+        fn = set_uid(watcher)
+        fn()
         getpwnam.assert_called_with("ubuntu")
         setuid.assert_called_with(500)

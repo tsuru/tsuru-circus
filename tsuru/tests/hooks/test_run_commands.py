@@ -17,9 +17,9 @@ class RunCommandsTest(TestCase):
                             uid="ubuntu")
 
     def cmd(self, command):
-        cmd = "source /home/application/apprc && cd {} && {}"
+        cmd = "source /home/application/apprc && {}"
         return ["/bin/bash", "-c",
-                cmd.format(self.watcher.working_dir, command)]
+                cmd.format(command)]
 
     @patch("tsuru.hooks.load_config")
     @patch("subprocess.check_output")
@@ -30,9 +30,12 @@ class RunCommandsTest(TestCase):
                 'pre-restart': ['testdata/pre.sh'],
             }
         }
+        set_uid.return_value = 10
         run_commands('pre-restart', watcher=self.watcher)
         check_output.assert_called_with(self.cmd("testdata/pre.sh"),
-                                        stderr=subprocess.STDOUT)
+                                        stderr=subprocess.STDOUT,
+                                        cwd=self.watcher.working_dir,
+                                        preexec_fn=10)
 
     @patch("tsuru.hooks.load_config")
     @patch("subprocess.check_output")
@@ -54,9 +57,12 @@ class RunCommandsTest(TestCase):
                 'pre-restart': ['testdata/pre.sh', 'testdata/pre2.sh'],
             }
         }
+        set_uid.return_value = 10
         run_commands('pre-restart', watcher=self.watcher)
-        calls = [call(self.cmd("testdata/pre.sh"), stderr=subprocess.STDOUT),
-                 call(self.cmd("testdata/pre2.sh"), stderr=subprocess.STDOUT)]
+        calls = [call(self.cmd("testdata/pre.sh"), stderr=subprocess.STDOUT,
+                      cwd=self.watcher.working_dir, preexec_fn=10),
+                 call(self.cmd("testdata/pre2.sh"), stderr=subprocess.STDOUT,
+                      cwd=self.watcher.working_dir, preexec_fn=10)]
         check_output.assert_has_calls(calls)
 
     @patch("tsuru.hooks.load_config")
