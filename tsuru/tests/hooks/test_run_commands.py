@@ -24,7 +24,8 @@ class RunCommandsTest(TestCase):
     @patch("tsuru.hooks.load_config")
     @patch("subprocess.check_output")
     @patch("tsuru.hooks.set_uid")
-    def test_run_commands_with_config(self, set_uid, check_output, load_config):
+    def test_run_commands_with_config(self, set_uid,
+                                      check_output, load_config):
         load_config.return_value = {
             'hooks': {
                 'pre-restart': ['testdata/pre.sh'],
@@ -51,7 +52,8 @@ class RunCommandsTest(TestCase):
     @patch("tsuru.hooks.load_config")
     @patch("subprocess.check_output")
     @patch("tsuru.hooks.set_uid")
-    def test_run_commands_many_commands(self, set_uid, check_output, load_config):
+    def test_run_commands_many_commands(self, set_uid,
+                                        check_output, load_config):
         load_config.return_value = {
             'hooks': {
                 'pre-restart': ['testdata/pre.sh', 'testdata/pre2.sh'],
@@ -138,7 +140,8 @@ class RunCommandsTest(TestCase):
     @patch("tsuru.hooks.load_config")
     @patch("tsuru.stream.Stream")
     @patch("tsuru.hooks.set_uid")
-    def test_log_only_when_the_commands_is_executed(self, set_uid, Stream, load_config):
+    def test_log_only_when_the_commands_is_executed(self, set_uid,
+                                                    Stream, load_config):
         load_config.return_value = {
             'hooks': {
                 'pre-restart': ['ps -ef'],
