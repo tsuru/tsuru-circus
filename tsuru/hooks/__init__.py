@@ -3,8 +3,10 @@
 # license that can be found in the LICENSE file.
 
 import os
-import yaml
+import pwd
 import subprocess
+
+import yaml
 
 
 def load_config(**kwargs):
@@ -17,6 +19,11 @@ def load_config(**kwargs):
         except IOError:
             pass
     return {}
+
+
+def set_uid(watcher):
+    uid = pwd.getpwnam(watcher.uid).pw_uid
+    os.setuid(uid)
 
 
 def run_commands(name, **kwargs):
