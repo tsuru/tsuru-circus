@@ -30,6 +30,7 @@ def run_commands(name, **kwargs):
     from tsuru.stream import Stream
     config = load_config(**kwargs)
     watcher = kwargs.get("watcher")
+    set_uid(watcher)
     cmds = config.get('hooks', {}).get(name, [])
     if cmds:
         Stream(watcher_name=watcher.name)(
