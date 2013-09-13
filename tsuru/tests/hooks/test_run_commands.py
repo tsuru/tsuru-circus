@@ -41,6 +41,25 @@ class RunCommandsTest(TestCase):
     @patch("tsuru.hooks.load_config")
     @patch("subprocess.check_output")
     @patch("tsuru.hooks.set_uid")
+    def test_run_commands_colon_format(self, set_uid,
+                                        check_output, load_config):
+        load_config.return_value = {
+            'hooks': {
+                'restart': {
+                    'before-each': ['testdata/pre.sh'],
+                },
+            },
+        }
+        set_uid.return_value = 10
+        run_commands('restart:before-each', watcher=self.watcher)
+        check_output.assert_called_with(self.cmd("testdata/pre.sh"),
+                                        stderr=subprocess.STDOUT,
+                                        cwd=self.watcher.working_dir,
+                                        preexec_fn=10)
+
+    @patch("tsuru.hooks.load_config")
+    @patch("subprocess.check_output")
+    @patch("tsuru.hooks.set_uid")
     def test_run_commands_without_config(self, set_uid, check_output,
                                          load_config):
         load_config.return_value = {
