@@ -3,7 +3,7 @@
 # license that can be found in the LICENSE file.
 
 from unittest import TestCase
-from mock import patch
+from mock import call, patch
 
 from tsuru.hooks import after_start
 
@@ -13,5 +13,7 @@ class AfterStartTest(TestCase):
     def test_after_start(self, run_commands):
         run_commands.return_value = True
         result = after_start()
-        run_commands.assert_called_with('post-restart')
+        calls = [call('restart:after-each'),
+                 call('post-restart')]
+        run_commands.assert_has_calls(calls)
         self.assertTrue(result)

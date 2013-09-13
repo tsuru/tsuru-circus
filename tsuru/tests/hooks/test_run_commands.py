@@ -42,7 +42,7 @@ class RunCommandsTest(TestCase):
     @patch("subprocess.check_output")
     @patch("tsuru.hooks.set_uid")
     def test_run_commands_colon_format(self, set_uid,
-                                        check_output, load_config):
+                                       check_output, load_config):
         load_config.return_value = {
             'hooks': {
                 'restart': {

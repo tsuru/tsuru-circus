@@ -3,7 +3,7 @@
 # license that can be found in the LICENSE file.
 
 from unittest import TestCase
-from mock import patch
+from mock import call, patch
 
 from tsuru.hooks import before_start
 
@@ -13,5 +13,7 @@ class BeforeStartTest(TestCase):
     def test_before_start(self, run_commands):
         run_commands.return_value = True
         result = before_start()
-        run_commands.assert_called_with('pre-restart')
+        calls = [call('restart:before-each'),
+                 call('pre-restart')]
+        run_commands.assert_has_calls(calls)
         self.assertTrue(result)

@@ -56,8 +56,10 @@ def run_commands(name, **kwargs):
 
 
 def before_start(*args, **kwargs):
+    run_commands('restart:before-each', **kwargs)
     return run_commands('pre-restart', **kwargs)
 
 
 def after_start(*args, **kwargs):
+    run_commands('restart:after-each', **kwargs)
     return run_commands('post-restart', **kwargs)
