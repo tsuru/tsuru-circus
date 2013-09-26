@@ -2,7 +2,6 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-import json
 import os
 import re
 
@@ -145,7 +144,7 @@ class ProcfileWatcher(CircusPlugin):
             "stdout_stream": stdout_stream,
             "uid": self.uid,
         }
-        self.circus_client.call(json.dumps({
+        self.circus_client.call({
             "command": "add",
             "properties": {
                 "cmd": cmd,
@@ -155,7 +154,7 @@ class ProcfileWatcher(CircusPlugin):
                 "start": True,
                 "priority": 2,
             },
-        }))
+        })
 
     def remove_watcher(self, name):
         self.call("rm", name=name)

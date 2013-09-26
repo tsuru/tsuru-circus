@@ -4,7 +4,6 @@
 
 from unittest import TestCase
 from mock import Mock, patch
-import json
 import os.path
 
 from tsuru.plugins import ProcfileWatcher
@@ -14,7 +13,7 @@ from honcho.procfile import Procfile
 
 class ProcfileWatcherTest(TestCase):
     def build_options(self, name, cmd):
-        return json.dumps({
+        return {
             "command": "add",
             "properties": {
                 "cmd": cmd,
@@ -37,7 +36,7 @@ class ProcfileWatcherTest(TestCase):
                 "start": True,
                 "priority": 2,
             },
-        })
+        }
 
     def test_add_watcher(self):
         plugin = ProcfileWatcher("", "", 1)
