@@ -23,8 +23,11 @@ def load_config(**kwargs):
 
 def set_uid(watcher):
     def fn():
-        uid = pwd.getpwnam(watcher.uid).pw_uid
+        pwnam = pwd.getpwnam(watcher.uid)
+        uid = pwnam.pw_uid
         os.setuid(uid)
+        gid = pwnam.pw_gid
+        os.setgid(gid)
     return fn
 
 

@@ -17,9 +17,11 @@ class SetUIDTestCase(unittest.TestCase):
 
     @mock.patch("pwd.getpwnam")
     @mock.patch("os.setuid")
-    def test_set_uid_from_watcher(self, setuid, getpwnam):
+    @mock.patch("os.setgid")
+    def test_set_uid_from_watcher(self, setgid, setuid, getpwnam):
         passwd = Bag()
         passwd.pw_uid = 500
+        passwd.pw_gid = 500
         watcher = Bag()
         watcher.uid = "ubuntu"
         getpwnam.return_value = passwd
@@ -27,3 +29,4 @@ class SetUIDTestCase(unittest.TestCase):
         fn()
         getpwnam.assert_called_with("ubuntu")
         setuid.assert_called_with(500)
+        setgid.assert_called_with(500)
