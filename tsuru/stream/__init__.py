@@ -1,4 +1,4 @@
-# Copyright 2013 tsuru-circus authors. All rights reserved.
+# Copyright 2014 tsuru-circus authors. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
@@ -29,7 +29,8 @@ class Stream(object):
                                                        self.watcher_name)
             messages = extract_message(data["data"])
             requests.post(url, data=json.dumps(messages),
-                          headers={"Authorization": "bearer " + token})
+                          headers={"Authorization": "bearer " + token},
+                          timeout=2)
 
     def load_envs(self):
         envs = common.load_envs(self.apprc)

@@ -1,4 +1,4 @@
-# Copyright 2013 tsuru-circus authors. All rights reserved.
+# Copyright 2014 tsuru-circus authors. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
@@ -34,7 +34,8 @@ class StreamTestCase(unittest.TestCase):
         expected_msg = "Starting gunicorn 0.15.0\n"
         expected_data = json.dumps([expected_msg])
         post.assert_called_with(url, data=expected_data,
-                                headers={"Authorization": "bearer " + token})
+                                headers={"Authorization": "bearer " + token},
+                                timeout=2)
 
     @mock.patch("tsuru.common.load_envs")
     def test_should_slience_errors_when_envs_does_not_exist(lenvs, self):
