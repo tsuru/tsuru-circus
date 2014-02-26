@@ -38,6 +38,21 @@ class StreamTestCase(unittest.TestCase):
                                 timeout=2)
 
     @mock.patch("requests.post")
+    def test_timeout_is_configurable(self, post):
+        post.return_value = mock.Mock(status_code=200)
+        stream = Stream(watcher_name="watcher", timeout=10)
+        stream.apprc = os.path.join(os.path.dirname(__file__),
+                                    "testdata/apprc")
+        stream(self.data)
+        appname, host, token = stream.load_envs()
+        url = "{0}/apps/{1}/log?source=watcher".format(host, appname)
+        expected_msg = "Starting gunicorn 0.15.0\n"
+        expected_data = json.dumps([expected_msg])
+        post.assert_called_with(url, data=expected_data,
+                                headers={"Authorization": "bearer " + token},
+                                timeout=10)
+
+    @mock.patch("requests.post")
     def test_should_ignore_errors_in_post_call(self, post):
         post.side_effect = Exception()
         self.stream(self.data)

@@ -21,6 +21,7 @@ class Stream(object):
     def __init__(self, **kwargs):
         self.apprc = "/home/application/apprc"
         self.watcher_name = kwargs.get("watcher_name", "")
+        self.timeout = kwargs.get("timeout", 2)
 
     def __call__(self, data):
         appname, host, token = self.load_envs()
@@ -31,7 +32,7 @@ class Stream(object):
             try:
                 requests.post(url, data=json.dumps(messages),
                               headers={"Authorization": "bearer " + token},
-                              timeout=2)
+                              timeout=self.timeout)
             except:
                 pass
 
