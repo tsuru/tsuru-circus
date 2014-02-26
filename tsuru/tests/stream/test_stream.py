@@ -37,6 +37,11 @@ class StreamTestCase(unittest.TestCase):
                                 headers={"Authorization": "bearer " + token},
                                 timeout=2)
 
+    @mock.patch("requests.post")
+    def test_should_ignore_errors_in_post_call(self, post):
+        post.side_effect = Exception()
+        self.stream(self.data)
+
     @mock.patch("tsuru.common.load_envs")
     def test_should_slience_errors_when_envs_does_not_exist(lenvs, self):
         lenvs.return_value = {}

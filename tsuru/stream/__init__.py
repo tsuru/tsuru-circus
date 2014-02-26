@@ -28,9 +28,12 @@ class Stream(object):
             url = "{0}/apps/{1}/log?source={2}".format(host, appname,
                                                        self.watcher_name)
             messages = extract_message(data["data"])
-            requests.post(url, data=json.dumps(messages),
-                          headers={"Authorization": "bearer " + token},
-                          timeout=2)
+            try:
+                requests.post(url, data=json.dumps(messages),
+                              headers={"Authorization": "bearer " + token},
+                              timeout=2)
+            except:
+                pass
 
     def load_envs(self):
         envs = common.load_envs(self.apprc)
