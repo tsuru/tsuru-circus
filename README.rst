@@ -1,8 +1,8 @@
 tsuru-circus
 ============
 
-.. image:: https://secure.travis-ci.org/globocom/tsuru-circus.png
-   :target: http://travis-ci.org/globocom/tsuru-circus
+.. image:: https://secure.travis-ci.org/tsuru/tsuru-circus.png
+   :target: http://travis-ci.org/tsuru/tsuru-circus
 
 
 tsuru-circus is a collection of circus extensions for tsuru.
@@ -26,8 +26,8 @@ To use the tsuru stream to send circus log to tsuru you need to set the tsuru St
 development
 ===========
 
-* Source hosted at `GitHub <http://github.com/globocom/tsuru-circus>`_
-* Report issues on `GitHub Issues <http://github.com/globocom/tsuru-circus/issues>`_
+* Source hosted at `GitHub <http://github.com/tsuru/tsuru-circus>`_
+* Report issues on `GitHub Issues <http://github.com/tsuru/tsuru-circus/issues>`_
 
 Pull requests are very welcomed! Make sure your patches are well tested.
 
