@@ -5,7 +5,10 @@
 import json
 import re
 import requests
+import logging
+import socket
 
+from logging.handlers import SysLogHandler
 from tsuru import common
 
 
@@ -24,7 +27,8 @@ class Stream(object):
         self.timeout = kwargs.get("timeout", 2)
 
     def __call__(self, data):
-        appname, host, token = self.load_envs()
+        (appname, host, token, syslog_server, syslog_port,
+         syslog_facility, syslog_socket) = self.load_envs()
         if appname and host and token:
             url = "{0}/apps/{1}/log?source={2}".format(host, appname,
                                                        self.watcher_name)
@@ -35,11 +39,33 @@ class Stream(object):
                               timeout=self.timeout)
             except:
                 pass
+        if syslog_server and syslog_port and syslog_facility:
+            messages = extract_message(data["data"])
+            try:
+                if syslog_socket == 'tcp':
+                    socket_type = socket.SOCK_STREAM
+                else:
+                    socket_type = socket.SOCK_DGRAM
+                logger = logging.getLogger(appname)
+                logger.addHandler(SysLogHandler(address=(syslog_server,
+                                                         int(syslog_port)),
+                                                facility=syslog_facility,
+                                                socktype=socket_type))
+                if data["name"] == 'stdout':
+                    logging.info(messages[0])
+                else:
+                    logging.error(messages[0])
+
+            except:
+                pass
 
     def load_envs(self):
         envs = common.load_envs(self.apprc)
         return (envs.get("TSURU_APPNAME"), envs.get("TSURU_HOST"),
-                envs.get("TSURU_APP_TOKEN"))
+                envs.get("TSURU_APP_TOKEN"), envs.get("TSURU_SYSLOG_SERVER"),
+                envs.get("TSURU_SYSLOG_PORT"),
+                envs.get("TSURU_SYSLOG_FACILITY"),
+                envs.get("TSURU_SYSLOG_SOCKET"))
 
     def close(self):
         pass
