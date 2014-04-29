@@ -6,9 +6,9 @@ import json
 import re
 import requests
 import logging
-import socket
 
 from logging.handlers import SysLogHandler
+from socket import SOCK_DGRAM, SOCK_STREAM
 from tsuru import common
 
 
@@ -30,34 +30,40 @@ class Stream(object):
         (appname, host, token, syslog_server, syslog_port,
          syslog_facility, syslog_socket) = self.load_envs()
         if appname and host and token:
-            url = "{0}/apps/{1}/log?source={2}".format(host, appname,
-                                                       self.watcher_name)
-            messages = extract_message(data["data"])
-            try:
-                requests.post(url, data=json.dumps(messages),
-                              headers={"Authorization": "bearer " + token},
-                              timeout=self.timeout)
-            except:
-                pass
+            self.log_tsuru_api(data, appname, host, token)
         if syslog_server and syslog_port and syslog_facility:
-            messages = extract_message(data["data"])
-            try:
-                if syslog_socket == 'tcp':
-                    socket_type = socket.SOCK_STREAM
-                else:
-                    socket_type = socket.SOCK_DGRAM
-                logger = logging.getLogger(appname)
-                logger.addHandler(SysLogHandler(address=(syslog_server,
-                                                         int(syslog_port)),
-                                                facility=syslog_facility,
-                                                socktype=socket_type))
-                if data["name"] == 'stdout':
-                    logging.info(messages[0])
-                else:
-                    logging.error(messages[0])
+            self.log_syslog(data, appname, syslog_server, syslog_port,
+                            syslog_facility, syslog_socket)
 
-            except:
-                pass
+    def log_tsuru_api(self, data, appname, host, token):
+        url = "{0}/apps/{1}/log?source={2}".format(host, appname,
+                                                   self.watcher_name)
+        messages = extract_message(data["data"])
+        try:
+            requests.post(url, data=json.dumps(messages),
+                          headers={"Authorization": "bearer " + token},
+                          timeout=self.timeout)
+        except:
+            pass
+
+    def log_syslog(self, data, appname, host, port, facility, socket):
+        messages = extract_message(data["data"])
+        try:
+            if socket == 'tcp':
+                socket_type = SOCK_STREAM
+            else:
+                socket_type = SOCK_DGRAM
+            logger = logging.getLogger(appname)
+            logger.addHandler(SysLogHandler(address=(host,
+                                                     int(port)),
+                                            facility=facility,
+                                            socktype=socket_type))
+            if data["name"] == 'stdout':
+                logging.info(messages[0])
+            else:
+                logging.error(messages[0])
+        except:
+            pass
 
     def load_envs(self):
         envs = common.load_envs(self.apprc)
