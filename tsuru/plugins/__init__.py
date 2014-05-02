@@ -107,6 +107,7 @@ class ProcfileWatcher(CircusPlugin):
         self.apprc = config.get("apprc", "/home/application/apprc")
         self.port = config.get("port", "8888")
         self.uid = config.get("uid", "ubuntu")
+        self.gid = config.get("gid", self.uid)
         self.stderr_stream = {"class": config.get("stderr_stream",
                                                   "tsuru.stream.Stream")}
         self.stdout_stream = {"class": config.get("stdout_stream",
@@ -143,6 +144,7 @@ class ProcfileWatcher(CircusPlugin):
             "stderr_stream": stderr_stream,
             "stdout_stream": stdout_stream,
             "uid": self.uid,
+            "gid": self.gid,
         }
         self.circus_client.call({
             "command": "add",
