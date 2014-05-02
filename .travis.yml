@@ -1,9 +1,3 @@
 language: python
 script:
   - make test
-notifications:
-  irc:
-    channels:
-      - "irc.freenode.net#tsuru"
-    on_success: change
-    on_failure: always
