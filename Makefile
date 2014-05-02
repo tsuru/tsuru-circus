@@ -1,6 +1,6 @@
 deps:
 	@pip install -r test-requirements.txt
 
-test: deps
+test:
 	@python setup.py test
 	@flake8 tsuru
