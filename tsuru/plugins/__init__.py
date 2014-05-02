@@ -130,9 +130,13 @@ class ProcfileWatcher(CircusPlugin):
     def handle_recv(self, data):
         pass
 
-    def add_watcher(self, name, cmd):
+    def load_envs(self):
         env = {"port": self.port, "PORT": self.port}
         env.update(common.load_envs(self.apprc))
+        return env
+
+    def add_watcher(self, name, cmd):
+        env = self.load_envs()
         cmd = replace_args(cmd, **env)
         stderr_stream = self.stderr_stream.copy()
         stdout_stream = self.stdout_stream.copy()
@@ -162,8 +166,7 @@ class ProcfileWatcher(CircusPlugin):
         self.call("rm", name=name)
 
     def change_cmd(self, name, cmd):
-        env = {"port": self.port}
-        env.update(common.load_envs(self.apprc))
+        env = self.load_envs()
         cmd = replace_args(cmd, **env)
         self.call("set", name=name, options={"cmd": cmd})
 

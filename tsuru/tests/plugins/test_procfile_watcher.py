@@ -160,10 +160,10 @@ class ProcfileWatcherTest(TestCase):
         plugin.call = Mock()
         plugin.port = 8888
         name = "name"
-        cmd = "echo ${PORT} ${BLE}"
+        cmd = "echo ${PORT} ${port} ${BLE}"
         plugin.change_cmd(name=name, cmd=cmd)
         plugin.call.assert_called_with('set',
-                                       options={'cmd': 'echo 8888 bla'},
+                                       options={'cmd': 'echo 8888 8888 bla'},
                                        name=name)
 
     def test_commands_dont_remove_tsuru_hooks_watcher(self):
