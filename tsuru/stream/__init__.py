@@ -48,20 +48,25 @@ class Stream(object):
 
     def log_syslog(self, data, appname, host, port, facility, socket):
         messages = extract_message(data["data"])
+        if socket == 'tcp':
+            socket_type = SOCK_STREAM
+        else:
+            socket_type = SOCK_DGRAM
         try:
-            if socket == 'tcp':
-                socket_type = SOCK_STREAM
-            else:
-                socket_type = SOCK_DGRAM
             logger = logging.getLogger(appname)
-            logger.addHandler(SysLogHandler(address=(host,
-                                                     int(port)),
-                                            facility=facility,
-                                            socktype=socket_type))
-            if data["name"] == 'stdout':
-                logging.info(messages[0])
-            else:
-                logging.error(messages[0])
+            logger.handlers = []
+            logger.setLevel(logging.INFO)
+            syslog = SysLogHandler(address=(host, int(port)),
+                                   facility=facility, socktype=socket_type)
+            formatter = logging.Formatter('%(name)s: %(levelname)s \
+                                           %(message)s')
+            syslog.setFormatter(formatter)
+            logger.addHandler(syslog)
+            for m in messages:
+                if data["name"] == 'stdout':
+                    logger.info(m)
+                else:
+                    logger.error(m)
         except:
             pass
 

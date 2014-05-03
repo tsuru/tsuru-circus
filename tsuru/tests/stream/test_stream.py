@@ -6,6 +6,7 @@ import unittest
 import mock
 import os
 import json
+import logging
 
 from tsuru.stream import Stream
 
@@ -47,9 +48,7 @@ class StreamTestCase(unittest.TestCase):
 
     @mock.patch("logging.getLogger")
     @mock.patch('logging.handlers.SysLogHandler')
-    @mock.patch('logging.info')
-    def test_should_send_log_to_syslog_as_info(self, l_info,
-                                               s_handler, logger):
+    def test_should_send_log_to_syslog_as_info(self, s_handler, logger):
         self.stream(self.data['stdout'])
         (appname, host, token, syslog_server,
          syslog_port, syslog_facility, syslog_socket) = self.stream.load_envs()
@@ -59,13 +58,11 @@ class StreamTestCase(unittest.TestCase):
                                 socktype=syslog_socket)
         expected_msg = "Starting gunicorn 0.15.0\n"
         my_logger.addHandler(log_handler)
-        l_info.assert_called_with(expected_msg)
+        my_logger.info.assert_called_with(expected_msg)
 
     @mock.patch("logging.getLogger")
     @mock.patch('logging.handlers.SysLogHandler')
-    @mock.patch('logging.error')
-    def test_should_send_log_to_syslog_as_error(self, l_error,
-                                                s_handler, logger):
+    def test_should_send_log_to_syslog_as_error(self, s_handler, logger):
         self.stream(self.data['stderr'])
         (appname, host, token, syslog_server,
          syslog_port, syslog_facility, syslog_socket) = self.stream.load_envs()
@@ -75,7 +72,17 @@ class StreamTestCase(unittest.TestCase):
                                 socktype=syslog_socket)
         expected_msg = "Error starting gunicorn\n"
         my_logger.addHandler(log_handler)
-        l_error.assert_called_with(expected_msg)
+        my_logger.error.assert_called_with(expected_msg)
+
+    def test_should_send_log_to_syslog_and_use_one_handler(self):
+        self.stream(self.data['stderr'])
+        self.stream(self.data['stderr'])
+        self.stream(self.data['stderr'])
+        self.stream(self.data['stderr'])
+        (appname, host, token, syslog_server,
+         syslog_port, syslog_facility, syslog_socket) = self.stream.load_envs()
+        my_logger = logging.getLogger(appname)
+        self.assertEqual(len(my_logger.handlers), 1)
 
     @mock.patch("requests.post")
     def test_timeout_is_configurable(self, post):
