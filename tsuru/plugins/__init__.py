@@ -75,7 +75,7 @@ class ApprcWatcher(CircusPlugin):
         pass
 
     def reload_env(self):
-        envs = {"port": self.port}
+        envs = {"port": self.port, "PORT": self.port}
         envs.update(common.load_envs(self.apprc))
         for name in self.cmds():
             if not name.startswith("plugin:"):

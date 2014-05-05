@@ -108,7 +108,12 @@ class ApprcWatcherTest(unittest.TestCase):
         plugin.apprc = os.path.join(os.path.dirname(__file__),
                                     "testdata/apprc")
         plugin.reload_env()
-        env = {"VAR1": "value-1", "port": "8888", "VAR2": "value2"}
+        env = {
+            "VAR1": "value-1",
+            "port": "8888",
+            "VAR2": "value2",
+            "PORT": "8888"
+        }
         env.update(os.environ)
         expected = [
             {"name": "cmd", "options": {"env": env}},
@@ -125,7 +130,12 @@ class ApprcWatcherTest(unittest.TestCase):
         plugin.apprc = os.path.join(os.path.dirname(__file__),
                                     "testdata/apprc")
         plugin.reload_env()
-        env = {"VAR1": "value-1", "port": "8888", "VAR2": "value2"}
+        env = {
+            "VAR1": "value-1",
+            "port": "8888",
+            "VAR2": "value2",
+            "PORT": "8888"
+        }
         env.update(os.environ)
         expected = [
             {"name": "name", "options": {"env": env}},
