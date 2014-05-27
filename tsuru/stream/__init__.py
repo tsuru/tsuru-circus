@@ -8,7 +8,7 @@ import requests
 import logging
 
 from logging.handlers import SysLogHandler
-from socket import SOCK_DGRAM, SOCK_STREAM
+from socket import SOCK_DGRAM, SOCK_STREAM, gethostname
 from tsuru import common
 
 
@@ -25,6 +25,7 @@ class Stream(object):
         self.apprc = "/home/application/apprc"
         self.watcher_name = kwargs.get("watcher_name", "")
         self.timeout = kwargs.get("timeout", 2)
+        self.hostname = gethostname()
 
     def __call__(self, data):
         (appname, host, token, syslog_server, syslog_port,
@@ -36,8 +37,9 @@ class Stream(object):
                             syslog_facility, syslog_socket)
 
     def log_tsuru_api(self, data, appname, host, token):
-        url = "{0}/apps/{1}/log?source={2}".format(host, appname,
-                                                   self.watcher_name)
+        url = "{0}/apps/{1}/log?source={2}&unit={3}".format(host, appname,
+                                                            self.watcher_name,
+                                                            self.hostname)
         messages = extract_message(data["data"])
         try:
             requests.post(url, data=json.dumps(messages),

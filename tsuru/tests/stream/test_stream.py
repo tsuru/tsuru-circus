@@ -12,7 +12,9 @@ from tsuru.stream import Stream
 
 
 class StreamTestCase(unittest.TestCase):
-    def setUp(self):
+    @mock.patch("tsuru.stream.gethostname")
+    def setUp(self, gethostname):
+        gethostname.return_value = "myhost"
         l_out = '2012-11-06 17:13:55 [12019] [INFO] Starting gunicorn 0.15.0\n'
         l_err = '2012-11-06 17:13:55 [12019] [ERROR] Error starting gunicorn\n'
         self.data = {}
@@ -39,7 +41,8 @@ class StreamTestCase(unittest.TestCase):
         self.stream(self.data['stdout'])
         (appname, host, token, syslog_server,
          syslog_port, syslog_facility, syslog_socket) = self.stream.load_envs()
-        url = "{0}/apps/{1}/log?source=mywatcher".format(host, appname)
+        url = "{0}/apps/{1}/log?source=mywatcher&unit=myhost".format(host,
+                                                                     appname)
         expected_msg = "Starting gunicorn 0.15.0\n"
         expected_data = json.dumps([expected_msg])
         post.assert_called_with(url, data=expected_data,
@@ -84,16 +87,19 @@ class StreamTestCase(unittest.TestCase):
         my_logger = logging.getLogger(appname)
         self.assertEqual(len(my_logger.handlers), 1)
 
+    @mock.patch("tsuru.stream.gethostname")
     @mock.patch("requests.post")
-    def test_timeout_is_configurable(self, post):
+    def test_timeout_is_configurable(self, post, gethostname):
         post.return_value = mock.Mock(status_code=200)
+        gethostname.return_value = "myhost"
         stream = Stream(watcher_name="watcher", timeout=10)
         stream.apprc = os.path.join(os.path.dirname(__file__),
                                     "testdata/apprc")
         stream(self.data['stdout'])
         (appname, host, token, syslog_server,
          syslog_port, syslog_facility, syslog_socket) = self.stream.load_envs()
-        url = "{0}/apps/{1}/log?source=watcher".format(host, appname)
+        url = "{0}/apps/{1}/log?source=watcher&unit=myhost".format(host,
+                                                                   appname)
         expected_msg = "Starting gunicorn 0.15.0\n"
         expected_data = json.dumps([expected_msg])
         post.assert_called_with(url, data=expected_data,
