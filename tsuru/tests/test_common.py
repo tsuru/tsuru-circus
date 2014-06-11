@@ -15,7 +15,8 @@ class CommonTestCase(unittest.TestCase):
             "TSURU_HOST": "host1",
             "TSURU_SYSLOG_SERVER": "host2",
             "TSURU_SYSLOG_PORT": "514",
-            "TSURU_SYSLOG_FACILITY": "LOCAL0"
+            "TSURU_SYSLOG_FACILITY": "LOCAL0",
+            "BASE64_STRING": "t5urur0ck5=="
         }
         got = common.load_envs(path)
         self.assertEqual(want, got)

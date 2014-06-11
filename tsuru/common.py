@@ -8,7 +8,7 @@ def load_envs(path):
             for line in file.readlines():
                 if "export" in line:
                     line = line.replace("export ", "")
-                    k, v = line.split("=")
+                    k, v = line.split("=", 1)
                     v = v.replace("\n", "").replace('"', '')
                     envs[k] = v
     return envs
