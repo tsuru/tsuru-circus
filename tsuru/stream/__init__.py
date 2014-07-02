@@ -60,8 +60,9 @@ class Stream(object):
             logger.setLevel(logging.INFO)
             syslog = SysLogHandler(address=(host, int(port)),
                                    facility=facility, socktype=socket_type)
-            formatter = logging.Formatter('%(name)s: %(levelname)s \
-                                           %(message)s')
+            formatter = logging.Formatter('%(asctime)s {} %(name)s:\
+                                           %(message)s'.format(self.hostname),
+                                          '%b  %d %H:%M:%S')
             syslog.setFormatter(formatter)
             logger.addHandler(syslog)
             for m in messages:
