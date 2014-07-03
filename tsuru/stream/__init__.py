@@ -22,6 +22,8 @@ def extract_message(msg):
 class Stream(object):
 
     def __init__(self, **kwargs):
+        self._buffer = ""
+        self._max_buffer_size = kwargs.get("max_buffer_size", 10240)
         self.apprc = "/home/application/apprc"
         self.watcher_name = kwargs.get("watcher_name", "")
         self.timeout = kwargs.get("timeout", 2)
@@ -40,7 +42,7 @@ class Stream(object):
         url = "{0}/apps/{1}/log?source={2}&unit={3}".format(host, appname,
                                                             self.watcher_name,
                                                             self.hostname)
-        messages = extract_message(data["data"])
+        messages = self.get_messages(data["data"])
         try:
             requests.post(url, data=json.dumps(messages),
                           headers={"Authorization": "bearer " + token},
@@ -49,7 +51,7 @@ class Stream(object):
             pass
 
     def log_syslog(self, data, appname, host, port, facility, socket):
-        messages = extract_message(data["data"])
+        messages = self.get_messages(data["data"])
         if socket == 'tcp':
             socket_type = SOCK_STREAM
         else:
@@ -83,3 +85,17 @@ class Stream(object):
 
     def close(self):
         pass
+
+    def get_messages(self, msg):
+        result = []
+        if self._buffer != "":
+            msg = self._buffer + msg
+            self._buffer = ""
+        msgs = extract_message(msg)
+        lines = "".join(msgs).splitlines(True)
+        for line in lines:
+            if (line.endswith("\n") or len(line) > self._max_buffer_size):
+                result.append(line)
+            else:
+                self._buffer = line
+        return result

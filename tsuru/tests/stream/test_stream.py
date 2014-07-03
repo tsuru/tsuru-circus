@@ -121,3 +121,110 @@ class StreamTestCase(unittest.TestCase):
             msg = "Should not fail when envs does not exist. " \
                   "Exception: {}".format(e)
             self.fail(msg)
+
+    def test_get_messagess_no_buffering(self):
+        stream = Stream()
+        msg = "2012-11-06 18:30:10 [13887] [INFO] Listening at: " \
+              "http://127.0.0.1:8000 (13887)\n2012-11-06 18:30:10 [13887] " \
+              "[INFO] Using worker: sync\n2012-11-06 18:30:10 [13890] " \
+              "[INFO] Booting worker with pid: 13890\n2012-11-06 18:30:10 " \
+              "[13890] [ERROR] Exception in worker process:\nTraceback " \
+              "(most recent call last):\n"
+        expected = [
+            "Listening at: http://127.0.0.1:8000 (13887)\n",
+            "Using worker: sync\n",
+            "Booting worker with pid: 13890\n",
+            "Exception in worker process:\n",
+            "Traceback (most recent call last):\n",
+        ]
+        messages = stream.get_messages(msg)
+        self.assertEqual("", stream._buffer)
+        self.assertEqual(expected, messages)
+
+    def test_get_messagess_buffering(self):
+        stream = Stream()
+        msg = "2012-11-06 18:30:10 [13887] [INFO] Listening at: " \
+              "http://127.0.0.1:8000 (13887)\n2012-11-06 18:30:10 [13887] " \
+              "[INFO] Using worker: sync\n2012-11-06 18:30:10 [13890] " \
+              "[INFO] Booting worker with pid: 13890\n2012-11-06 18:30:10 " \
+              "[13890] [ERROR] Exception in worker process:\nTraceback " \
+              "(most recent call last):"
+        expected = [
+            "Listening at: http://127.0.0.1:8000 (13887)\n",
+            "Using worker: sync\n",
+            "Booting worker with pid: 13890\n",
+            "Exception in worker process:\n",
+        ]
+        messages = stream.get_messages(msg)
+        self.assertEqual("Traceback (most recent call last):", stream._buffer)
+        self.assertEqual(expected, messages)
+
+    def test_get_messagess_buffered(self):
+        stream = Stream()
+        msg1 = "2012-11-06 18:30:10 [13887] [INFO] Listening at: " \
+               "http://127.0.0.1:8000 (13887)\n2012-11-06 18:30:10 [13887] "
+        msg2 = "[INFO] Using worker: sync\n2012-11-06 18:30:10 "
+        msg3 = "[13890] [INFO] Booting worker with pid: 13890\n2012-11-06 " \
+               "18:30:10 [13890] [ERROR] Exception in worker process:\n" \
+               "Traceback (most recent call last):\n"
+        expected = [
+            "Listening at: http://127.0.0.1:8000 (13887)\n",
+            "Using worker: sync\n",
+            "Booting worker with pid: 13890\n",
+            "Exception in worker process:\n",
+            "Traceback (most recent call last):\n",
+        ]
+        self.assertEqual(expected[:1], stream.get_messages(msg1))
+        self.assertEqual(expected[1:2], stream.get_messages(msg2))
+        self.assertEqual(expected[2:], stream.get_messages(msg3))
+
+    def test_get_messagess_full_buffer(self):
+        stream = Stream()
+        stream._max_buffer_size = 20
+        stream._buffer = 13 * "a"
+        msg = "2012-11-06 18:30:10 [13887] [INFO] Listening at: " \
+              "http://127.0.0.1:8000 (13887)"
+        expected = [stream._buffer +
+                    "Listening at: http://127.0.0.1:8000 (13887)"]
+        self.assertEqual(expected, stream.get_messages(msg))
+
+    def test_get_messages_buffered_multiple_times(self):
+        stream = Stream()
+        msg1 = "2012-11-06 18:30:10 [13887] [INFO] Listening at: " \
+               "http://127.0.0.1:8000 (13887)\n2012-11-06 18:30:10 [13887] "
+        msg2 = "[INFO] Using worker: sync\n2012-11-06 18:30:10 "
+        msg3 = "[13890] [INFO] Booting worker with pid: 13890\n2012-11-06 " \
+               "18:30:10 [13890] [ERROR] Exception in worker process:\n" \
+               "Traceback (most recent call last):"
+        msg4 = "\n2012-11-06 18:30:10 [13887] [INFO] Booting another worker "\
+               "with pid: 13891\n"
+        expected = [
+            "Listening at: http://127.0.0.1:8000 (13887)\n",
+            "Using worker: sync\n",
+            "Booting worker with pid: 13890\n",
+            "Exception in worker process:\n",
+            "Traceback (most recent call last):\n",
+            "Booting another worker with pid: 13891\n",
+        ]
+        self.assertEqual(expected[:1], stream.get_messages(msg1))
+        self.assertEqual(expected[1:2], stream.get_messages(msg2))
+        self.assertEqual(expected[2:4], stream.get_messages(msg3))
+        self.assertEqual(expected[4:], stream.get_messages(msg4))
+
+    def test_get_messages_sequential_bufferings(self):
+        stream = Stream()
+        msg1 = "2012-11-06 18:30:10 [13887] [INFO] Listening at: "
+        msg2 = "http://127.0.0.1:8000 "
+        msg3 = "(13887)\n"
+        self.assertEqual([], stream.get_messages(msg1))
+        self.assertEqual([], stream.get_messages(msg2))
+        self.assertEqual(["Listening at: http://127.0.0.1:8000 (13887)\n"],
+                         stream.get_messages(msg3))
+
+    def test_default_max_buffer_size(self):
+        stream = Stream()
+        self.assertEqual(10240, stream._max_buffer_size)
+
+    def test_max_buffer_size_is_configurable(self):
+        stream = Stream(max_buffer_size=500)
+        self.assertEqual(500, stream._max_buffer_size)
