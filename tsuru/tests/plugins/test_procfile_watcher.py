@@ -51,10 +51,10 @@ class ProcfileWatcherTest(TestCase):
 
     def test_remove_watcher(self):
         plugin = ProcfileWatcher("", "", 1)
-        plugin.call = Mock()
+        plugin.cast = Mock()
         name = "name"
         plugin.remove_watcher(name=name)
-        plugin.call.assert_called_with("rm", name=name)
+        plugin.cast.assert_called_with("rm", name=name)
 
     def test_commands(self):
         plugin = ProcfileWatcher("", "", 1)
@@ -92,14 +92,16 @@ class ProcfileWatcherTest(TestCase):
     def test_reload_procfile_remove_old_cmds(self):
         plugin = ProcfileWatcher("", "", 1)
         plugin.call = Mock()
+        plugin.cast = Mock()
         plugin.call.return_value = {"statuses": {"name": "name", "cmd": "cmd"}}
         plugin.procfile_path = os.path.join(os.path.dirname(__file__),
                                             "testdata/Procfile2")
         plugin.reload_procfile()
-        plugin.call.assert_called_with("rm", name="name")
+        plugin.cast.assert_called_with("rm", name="name")
 
     def test_reload_procfile_update_cmds(self):
         plugin = ProcfileWatcher("", "", 1)
+        plugin.cast = Mock()
         plugin.call = Mock()
         plugin.call.return_value = {"statuses": {"name": "name", "cmd": "cmd"}}
         plugin.get_cmd = Mock()
@@ -108,7 +110,7 @@ class ProcfileWatcherTest(TestCase):
                                             "testdata/Procfile3")
         plugin.reload_procfile()
         plugin.get_cmd.assert_called_with("name")
-        plugin.call.assert_called_with("set",
+        plugin.cast.assert_called_with("set",
                                        name="name",
                                        options={'cmd': 'cmd2'})
 
@@ -157,12 +159,12 @@ class ProcfileWatcherTest(TestCase):
         load_envs.return_value = {"BLE": "bla"}
         plugin = ProcfileWatcher("", "", 1)
         plugin.envs = lambda: {}
-        plugin.call = Mock()
+        plugin.cast = Mock()
         plugin.port = 8888
         name = "name"
         cmd = "echo ${PORT} ${port} ${BLE}"
         plugin.change_cmd(name=name, cmd=cmd)
-        plugin.call.assert_called_with('set',
+        plugin.cast.assert_casted_with('set',
                                        options={'cmd': 'echo 8888 8888 bla'},
                                        name=name)
 

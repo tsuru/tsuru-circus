@@ -88,7 +88,7 @@ class ApprcWatcher(CircusPlugin):
         if "PYTHONPATH" in values and "PYTHONPATH" not in envs:
             del values["PYTHONPATH"]
         if values != current:
-            self.call("set", name=name, options={"env": values})
+            self.cast("set", name=name, options={"env": values})
 
     def cmds(self):
         return self.call("status")["statuses"].keys()
@@ -163,12 +163,12 @@ class ProcfileWatcher(CircusPlugin):
         })
 
     def remove_watcher(self, name):
-        self.call("rm", name=name)
+        self.cast("rm", name=name)
 
     def change_cmd(self, name, cmd):
         env = self.load_envs()
         cmd = replace_args(cmd, **env)
-        self.call("set", name=name, options={"cmd": cmd})
+        self.cast("set", name=name, options={"cmd": cmd})
 
     def commands(self, procfile):
         cmds = self.call("status")["statuses"]

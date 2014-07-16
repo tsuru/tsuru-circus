@@ -38,7 +38,9 @@ def create_fake_call(status_return, options_return=NOPATH_OUTPUT):
 class ApprcWatcherTest(unittest.TestCase):
     def test_add_envs(self):
         plugin = ApprcWatcher("", "", 1)
-        plugin.call, kw = create_fake_call(None)
+        fake_call, kw = create_fake_call(None)
+        plugin.call = fake_call
+        plugin.cast = fake_call
         plugin.add_envs(name="name", envs={"foo": "bar"})
         env = copy.deepcopy(os.environ)
         env["foo"] = "bar"
@@ -49,7 +51,9 @@ class ApprcWatcherTest(unittest.TestCase):
         os.environ["SOMETHING_UNKNOWN"] = "123"
         self.addCleanup(remove_env, "SOMETHING_UNKNOWN")
         plugin = ApprcWatcher("", "", 1)
-        plugin.call, kw = create_fake_call(None)
+        fake_call, kw = create_fake_call(None)
+        plugin.call = fake_call
+        plugin.cast = fake_call
         plugin.add_envs(name="name", envs={"foo": "bar",
                                            "SOMETHING_UNKNOWN": "456"})
         env = copy.deepcopy(os.environ)
@@ -62,7 +66,9 @@ class ApprcWatcherTest(unittest.TestCase):
         plugin = ApprcWatcher("", "", 1)
         envs = copy.deepcopy(NOPATH_OUTPUT)
         envs["options"]["env"].update(os.environ)
-        plugin.call, kw = create_fake_call(None, envs)
+        fake_call, kw = create_fake_call(None, envs)
+        plugin.call = fake_call
+        plugin.cast = fake_call
         plugin.add_envs(name="name", envs=NOPATH_OUTPUT["options"]["env"])
         self.assertEqual([], kw)
 
@@ -70,7 +76,9 @@ class ApprcWatcherTest(unittest.TestCase):
         plugin = ApprcWatcher("", "", 1)
         envs = copy.deepcopy(NOPATH_OUTPUT)
         envs["options"]["env"]["foo"] = "foo"
-        plugin.call, kw = create_fake_call(None, envs)
+        fake_call, kw = create_fake_call(None, envs)
+        plugin.call = fake_call
+        plugin.cast = fake_call
         plugin.add_envs(name="name", envs={"foo": "bar"})
         env = copy.deepcopy(os.environ)
         env["foo"] = "bar"
@@ -81,7 +89,9 @@ class ApprcWatcherTest(unittest.TestCase):
         os.environ["PYTHONPATH"] = "/home/user/python"
         self.addCleanup(remove_env, "PYTHONPATH")
         plugin = ApprcWatcher("", "", 1)
-        plugin.call, kw = create_fake_call(None)
+        fake_call, kw = create_fake_call(None)
+        plugin.call = fake_call
+        plugin.cast = fake_call
         plugin.add_envs(name="name", envs={"foo": "bar"})
         env = copy.deepcopy(os.environ)
         env["foo"] = "bar"
@@ -91,7 +101,9 @@ class ApprcWatcherTest(unittest.TestCase):
 
     def test_add_env_doesnt_ignore_PYTHONPATH_from_apprc(self):
         plugin = ApprcWatcher("", "", 1)
-        plugin.call, kw = create_fake_call(None)
+        fake_call, kw = create_fake_call(None)
+        plugin.call = fake_call
+        plugin.cast = fake_call
         plugin.add_envs(name="name", envs={"foo": "bar",
                                            "PYTHONPATH": "/usr/lib/python"})
         env = copy.deepcopy(os.environ)
@@ -105,6 +117,7 @@ class ApprcWatcherTest(unittest.TestCase):
         fake_call, kw = create_fake_call(sr)
         plugin = ApprcWatcher("", "", 1)
         plugin.call = fake_call
+        plugin.cast = fake_call
         plugin.apprc = os.path.join(os.path.dirname(__file__),
                                     "testdata/apprc")
         plugin.reload_env()
@@ -127,6 +140,7 @@ class ApprcWatcherTest(unittest.TestCase):
         fake_call, kw = create_fake_call(sr)
         plugin = ApprcWatcher("", "", 1)
         plugin.call = fake_call
+        plugin.cast = fake_call
         plugin.apprc = os.path.join(os.path.dirname(__file__),
                                     "testdata/apprc")
         plugin.reload_env()
