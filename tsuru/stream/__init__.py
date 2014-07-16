@@ -10,7 +10,6 @@ import logging
 from logging.handlers import SysLogHandler
 from socket import SOCK_DGRAM, SOCK_STREAM, gethostname
 from tsuru import common
-from datetime import datetime
 
 
 def extract_message(msg):
@@ -58,15 +57,14 @@ class Stream(object):
         else:
             socket_type = SOCK_DGRAM
         try:
-            date_utc = datetime.utcnow().isoformat("T") + "Z"
             logger = logging.getLogger(appname)
             logger.handlers = []
             logger.setLevel(logging.INFO)
             syslog = SysLogHandler(address=(host, int(port)),
                                    facility=facility, socktype=socket_type)
-            formatter = logging.Formatter('{0} {1} %(name)s:\
-                                           %(message)s'.format(date_utc,
-                                                               self.hostname)),
+            formatter = logging.Formatter('%(asctime)s {} %(name)s:\
+                                           %(message)s'.format(self.hostname),
+                                          '%b  %d %H:%M:%S')
             syslog.setFormatter(formatter)
             logger.addHandler(syslog)
             for m in messages:
