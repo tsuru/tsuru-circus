@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
+import socket
 import unittest
 
 import mock
@@ -12,11 +13,13 @@ from tsuru.plugins import StatusReporter
 class StatusReporterTestCase(unittest.TestCase):
 
     def test_init(self):
+        hostname = socket.gethostname()
         status_reporter = StatusReporter("", "", 1,
                                          loop_rate=180,
                                          apprc="/etc/apprc")
         self.assertEqual(180, status_reporter.loop_rate)
         self.assertEqual("/etc/apprc", status_reporter.apprc)
+        self.assertEqual(hostname, status_reporter.hostname)
 
     def test_init_default_config_values(self):
         status_reporter = StatusReporter("", "", 1)
