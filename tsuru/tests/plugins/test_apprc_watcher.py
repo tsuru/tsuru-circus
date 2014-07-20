@@ -28,8 +28,10 @@ def create_fake_call(status_return, options_return=NOPATH_OUTPUT):
         if command == "status":
             return status_return
         elif command == "set":
-            kw.append(kwargs)
+            kw.append({"cmd": command, "args": kwargs})
             return {"set": "ok"}
+        elif command in ("start", "stop"):
+            kw.append({"cmd": command, "args": kwargs})
         elif command == "options":
             return options_return
     return fake_call, kw
@@ -44,7 +46,10 @@ class ApprcWatcherTest(unittest.TestCase):
         plugin.add_envs(name="name", envs={"foo": "bar"})
         env = copy.deepcopy(os.environ)
         env["foo"] = "bar"
-        expected = [{"name": "name", "options": {"env": env}}]
+        expected = [{"cmd": "stop", "args": {"name": "name"}},
+                    {"cmd": "set", "args": {"name": "name",
+                                            "options": {"env": env}}},
+                    {"cmd": "start", "args": {"name": "name"}}]
         self.assertEqual(expected, kw)
 
     def test_add_envs_may_override_os_environ(self):
@@ -59,7 +64,10 @@ class ApprcWatcherTest(unittest.TestCase):
         env = copy.deepcopy(os.environ)
         env["SOMETHING_UNKNOWN"] = "456"
         env["foo"] = "bar"
-        expected = [{"name": "name", "options": {"env": env}}]
+        expected = [{"cmd": "stop", "args": {"name": "name"}},
+                    {"cmd": "set", "args": {"name": "name",
+                                            "options": {"env": env}}},
+                    {"cmd": "start", "args": {"name": "name"}}]
         self.assertEqual(expected, kw)
 
     def test_add_envs_dont_call_set_when_variables_dont_change(self):
@@ -82,7 +90,10 @@ class ApprcWatcherTest(unittest.TestCase):
         plugin.add_envs(name="name", envs={"foo": "bar"})
         env = copy.deepcopy(os.environ)
         env["foo"] = "bar"
-        expected = [{"name": "name", "options": {"env": env}}]
+        expected = [{"cmd": "stop", "args": {"name": "name"}},
+                    {"cmd": "set", "args": {"name": "name",
+                                            "options": {"env": env}}},
+                    {"cmd": "start", "args": {"name": "name"}}]
         self.assertEqual(expected, kw)
 
     def test_add_env_ignores_PYTHONPATH_from_os_environ(self):
@@ -96,7 +107,10 @@ class ApprcWatcherTest(unittest.TestCase):
         env = copy.deepcopy(os.environ)
         env["foo"] = "bar"
         del env["PYTHONPATH"]
-        expected = [{"name": "name", "options": {"env": env}}]
+        expected = [{"cmd": "stop", "args": {"name": "name"}},
+                    {"cmd": "set", "args": {"name": "name",
+                                            "options": {"env": env}}},
+                    {"cmd": "start", "args": {"name": "name"}}]
         self.assertEqual(expected, kw)
 
     def test_add_env_doesnt_ignore_PYTHONPATH_from_apprc(self):
@@ -109,7 +123,10 @@ class ApprcWatcherTest(unittest.TestCase):
         env = copy.deepcopy(os.environ)
         env["foo"] = "bar"
         env["PYTHONPATH"] = "/usr/lib/python"
-        expected = [{"name": "name", "options": {"env": env}}]
+        expected = [{"cmd": "stop", "args": {"name": "name"}},
+                    {"cmd": "set", "args": {"name": "name",
+                                            "options": {"env": env}}},
+                    {"cmd": "start", "args": {"name": "name"}}]
         self.assertEqual(expected, kw)
 
     def test_reload_env_add_envs(self):
@@ -132,7 +149,15 @@ class ApprcWatcherTest(unittest.TestCase):
             {"name": "cmd", "options": {"env": env}},
             {"name": "name", "options": {"env": env}},
         ]
-        self.assertEqual(expected, sorted(kw, key=lambda x: x["name"]))
+        expected = [{"cmd": "stop", "args": {"name": "cmd"}},
+                    {"cmd": "set", "args": {"name": "cmd",
+                                            "options": {"env": env}}},
+                    {"cmd": "start", "args": {"name": "cmd"}},
+                    {"cmd": "stop", "args": {"name": "name"}},
+                    {"cmd": "set", "args": {"name": "name",
+                                            "options": {"env": env}}},
+                    {"cmd": "start", "args": {"name": "name"}}]
+        self.assertEqual(expected, sorted(kw, key=lambda x: x["args"]["name"]))
 
     def test_reload_env_skips_plugins(self):
         sr = {"statuses": {"name": "name",
@@ -151,7 +176,8 @@ class ApprcWatcherTest(unittest.TestCase):
             "PORT": "8888"
         }
         env.update(os.environ)
-        expected = [
-            {"name": "name", "options": {"env": env}},
-        ]
+        expected = [{"cmd": "stop", "args": {"name": "name"}},
+                    {"cmd": "set", "args": {"name": "name",
+                                            "options": {"env": env}}},
+                    {"cmd": "start", "args": {"name": "name"}}]
         self.assertEqual(expected, kw)

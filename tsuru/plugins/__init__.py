@@ -91,7 +91,9 @@ class ApprcWatcher(CircusPlugin):
         if "PYTHONPATH" in values and "PYTHONPATH" not in envs:
             del values["PYTHONPATH"]
         if values != current:
-            self.cast("set", name=name, options={"env": values})
+            self.call("stop", name=name)
+            self.call("set", name=name, options={"env": values})
+            self.cast("start", name=name)
 
     def cmds(self):
         return self.call("status")["statuses"].keys()
