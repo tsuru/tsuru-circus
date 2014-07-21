@@ -35,7 +35,6 @@ class ProcfileWatcherTest(TestCase):
                     "gid": "ubuntu",
                 },
                 "start": True,
-                "priority": 2,
             },
         }
 

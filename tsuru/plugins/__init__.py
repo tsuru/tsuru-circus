@@ -163,7 +163,6 @@ class ProcfileWatcher(CircusPlugin):
                 "args": [],
                 "options": options,
                 "start": True,
-                "priority": 2,
             },
         })
 
