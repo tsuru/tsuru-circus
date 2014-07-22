@@ -10,7 +10,6 @@ from socket import gethostname
 import requests
 
 from circus.plugins import CircusPlugin
-from circus.client import CircusClient
 from honcho.procfile import Procfile
 from zmq.eventloop import ioloop
 
@@ -121,7 +120,6 @@ class ProcfileWatcher(CircusPlugin):
         self.period = ioloop.PeriodicCallback(file_watcher,
                                               self.loop_rate * 1000,
                                               self.loop)
-        self.circus_client = CircusClient()
 
     def get_cmd(self, name):
         return self.call("get", name=name, keys=["cmd"])["options"]["cmd"]
@@ -155,16 +153,8 @@ class ProcfileWatcher(CircusPlugin):
             "uid": self.uid,
             "gid": self.gid,
         }
-        self.circus_client.call({
-            "command": "add",
-            "properties": {
-                "cmd": cmd,
-                "name": name,
-                "args": [],
-                "options": options,
-                "start": True,
-            },
-        })
+        self.call("add", cmd=cmd, name=name, options=options,
+                  start=True, waiting=True)
 
     def remove_watcher(self, name):
         self.cast("rm", name=name)

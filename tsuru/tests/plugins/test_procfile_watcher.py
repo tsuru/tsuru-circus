@@ -12,41 +12,35 @@ from honcho.procfile import Procfile
 
 
 class ProcfileWatcherTest(TestCase):
-    def build_options(self, name, cmd):
+    def build_options(self, name):
         return {
-            "command": "add",
-            "properties": {
-                "cmd": cmd,
-                "name": name,
-                "args": [],
-                "options": {
-                    "env": {"port": "8888", "PORT": "8888"},
-                    "copy_env": True,
-                    "working_dir": "/home/application/current",
-                    "stderr_stream": {
-                        "class": "tsuru.stream.Stream",
-                        "watcher_name": name
-                    },
-                    "stdout_stream": {
-                        "class": "tsuru.stream.Stream",
-                        "watcher_name": name
-                    },
-                    "uid": "ubuntu",
-                    "gid": "ubuntu",
-                },
-                "start": True,
+            "env": {"port": "8888", "PORT": "8888"},
+            "copy_env": True,
+            "working_dir": "/home/application/current",
+            "stderr_stream": {
+                "class": "tsuru.stream.Stream",
+                "watcher_name": name
             },
+            "stdout_stream": {
+                "class": "tsuru.stream.Stream",
+                "watcher_name": name
+            },
+            "uid": "ubuntu",
+            "gid": "ubuntu",
         }
 
     def test_add_watcher(self):
         plugin = ProcfileWatcher("", "", 1)
+        plugin.call = Mock()
         plugin.envs = lambda: {}
         plugin.circus_client = Mock()
         name = "name"
         cmd = "cmd"
-        options = self.build_options(name, cmd)
+        options = self.build_options(name)
         plugin.add_watcher(name=name, cmd=cmd)
-        plugin.circus_client.call.assert_called_with(options)
+        plugin.call.assert_called_with("add", cmd=cmd, name=name,
+                                       options=options, start=True,
+                                       waiting=True)
 
     def test_remove_watcher(self):
         plugin = ProcfileWatcher("", "", 1)
@@ -85,8 +79,10 @@ class ProcfileWatcherTest(TestCase):
         plugin.call = Mock()
         plugin.call.return_value = {"statuses": {}}
         plugin.reload_procfile()
-        options = self.build_options("name", "cmd")
-        plugin.circus_client.call.assert_called_with(options)
+        options = self.build_options("name")
+        plugin.call.assert_called_wit("add", cmd="cmd", name="name",
+                                      options=options, start=True,
+                                      waiting=True)
 
     def test_reload_procfile_remove_old_cmds(self):
         plugin = ProcfileWatcher("", "", 1)
@@ -125,33 +121,44 @@ class ProcfileWatcherTest(TestCase):
 
     def test_should_replace_cmds_with_environ(self):
         plugin = ProcfileWatcher("", "", 1)
+        plugin.call = Mock()
         plugin.envs = lambda: {}
         plugin.circus_client = Mock()
         name = "name"
         cmd = "echo $port"
-        options = self.build_options(name, "echo 8888")
+        options = self.build_options(name)
         plugin.add_watcher(name=name, cmd=cmd)
-        plugin.circus_client.call.assert_called_with(options)
+        cmd = cmd.replace("$port", "8888")
+        plugin.call.assert_called_with("add", cmd=cmd, name=name,
+                                       options=options, start=True,
+                                       waiting=True)
 
     def test_should_replace_cmds_with_environ_upercase(self):
         plugin = ProcfileWatcher("", "", 1)
+        plugin.call = Mock()
         plugin.envs = lambda: {}
         plugin.circus_client = Mock()
         name = "name"
         cmd = "echo $PORT"
-        options = self.build_options(name, "echo 8888")
+        options = self.build_options(name)
         plugin.add_watcher(name=name, cmd=cmd)
-        plugin.circus_client.call.assert_called_with(options)
+        cmd = cmd.replace("$PORT", "8888")
+        plugin.call.assert_called_with("add", cmd=cmd, name=name,
+                                       options=options, start=True,
+                                       waiting=True)
 
     def test_should_replace_cmds_with_environ_with_braces(self):
         plugin = ProcfileWatcher("", "", 1)
+        plugin.call = Mock()
         plugin.envs = lambda: {}
-        plugin.circus_client = Mock()
         name = "name"
         cmd = "echo ${PORT}"
-        options = self.build_options(name, "echo 8888")
+        options = self.build_options(name)
         plugin.add_watcher(name=name, cmd=cmd)
-        plugin.circus_client.call.assert_called_with(options)
+        cmd = cmd.replace("${PORT}", "8888")
+        plugin.call.assert_called_with("add", cmd=cmd, name=name,
+                                       options=options, start=True,
+                                       waiting=True)
 
     @patch("tsuru.common.load_envs")
     def test_change_cmd_should_replace_cmds_with_environ(self, load_envs):
