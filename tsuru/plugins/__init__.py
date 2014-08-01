@@ -120,20 +120,22 @@ class ProcfileWatcher(CircusPlugin):
                                                   "tsuru.stream.Stream")}
         self.stdout_stream = {"class": config.get("stdout_stream",
                                                   "tsuru.stream.Stream")}
+        self.ran = False
 
     def handle_init(self):
-        while True:
-            try:
-                self.reload_procfile()
-                break
-            except:
-                time.sleep(1)
+        pass
 
     def handle_stop(self):
         pass
 
     def handle_recv(self, data):
-        pass
+        while not self.ran:
+            try:
+                self.reload_procfile()
+                self.ran = True
+                break
+            except:
+                time.sleep(1)
 
     def load_envs(self):
         env = {"port": self.port, "PORT": self.port}

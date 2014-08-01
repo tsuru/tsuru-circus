@@ -29,14 +29,14 @@ class ProcfileWatcherTest(TestCase):
             "gid": "ubuntu",
         }
 
-    def test_handle_init(self):
+    def test_handle_recv(self):
         plugin = ProcfileWatcher("", "", 1)
         plugin.reload_procfile = Mock()
-        plugin.handle_init()
+        plugin.handle_recv(None)
         plugin.reload_procfile.assert_called_once()
 
     @patch("time.sleep")
-    def test_handle_init_retries(self, sleep):
+    def test_handle_recv_retries(self, sleep):
         calls = {"c": 0}
 
         def reload():
@@ -47,7 +47,7 @@ class ProcfileWatcherTest(TestCase):
         mock.side_effect = reload
         plugin = ProcfileWatcher("", "", 1)
         plugin.reload_procfile = mock
-        plugin.handle_init()
+        plugin.handle_recv(None)
         plugin.reload_procfile.assert_called()
         sleep.assert_called_once_with(1)
 
