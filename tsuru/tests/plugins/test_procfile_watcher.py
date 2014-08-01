@@ -6,7 +6,7 @@ from unittest import TestCase
 from mock import Mock, patch
 import os.path
 
-from tsuru.plugins import ProcfileWatcher
+from tsuru.plugins import ProcfileWatcher, WatcherCreationError
 
 from honcho.procfile import Procfile
 
@@ -29,9 +29,32 @@ class ProcfileWatcherTest(TestCase):
             "gid": "ubuntu",
         }
 
+    def test_handle_init(self):
+        plugin = ProcfileWatcher("", "", 1)
+        plugin.reload_procfile = Mock()
+        plugin.handle_init()
+        plugin.reload_procfile.assert_called_once()
+
+    @patch("time.sleep")
+    def test_handle_init_retries(self, sleep):
+        calls = {"c": 0}
+
+        def reload():
+            calls["c"] += 1
+            if calls["c"] == 1:
+                raise WatcherCreationError()
+        mock = Mock()
+        mock.side_effect = reload
+        plugin = ProcfileWatcher("", "", 1)
+        plugin.reload_procfile = mock
+        plugin.handle_init()
+        plugin.reload_procfile.assert_called()
+        sleep.assert_called_once_with(1)
+
     def test_add_watcher(self):
         plugin = ProcfileWatcher("", "", 1)
         plugin.call = Mock()
+        plugin.call.return_value = {"status": "ok"}
         plugin.envs = lambda: {}
         plugin.circus_client = Mock()
         name = "name"
@@ -42,12 +65,38 @@ class ProcfileWatcherTest(TestCase):
                                        options=options, start=True,
                                        waiting=True)
 
-    def test_remove_watcher(self):
+    def test_add_watcher_creation_error_none_status(self):
         plugin = ProcfileWatcher("", "", 1)
-        plugin.cast = Mock()
+        plugin.call = Mock()
+        plugin.call.return_value = None
+        plugin.envs = lambda: {}
+        plugin.circus_client = Mock()
         name = "name"
-        plugin.remove_watcher(name=name)
-        plugin.cast.assert_called_with("rm", name=name)
+        cmd = "cmd"
+        with self.assertRaises(WatcherCreationError):
+            plugin.add_watcher(name=name, cmd=cmd)
+
+    def test_add_watcher_creation_error_not_ok_status(self):
+        plugin = ProcfileWatcher("", "", 1)
+        plugin.call = Mock()
+        plugin.call.return_value = {"status": "error"}
+        plugin.envs = lambda: {}
+        plugin.circus_client = Mock()
+        name = "name"
+        cmd = "cmd"
+        with self.assertRaises(WatcherCreationError):
+            plugin.add_watcher(name=name, cmd=cmd)
+
+    def test_add_watcher_creation_error_not_dict(self):
+        plugin = ProcfileWatcher("", "", 1)
+        plugin.call = Mock()
+        plugin.call.return_value = 10
+        plugin.envs = lambda: {}
+        plugin.circus_client = Mock()
+        name = "name"
+        cmd = "cmd"
+        with self.assertRaises(WatcherCreationError):
+            plugin.add_watcher(name=name, cmd=cmd)
 
     def test_commands(self):
         plugin = ProcfileWatcher("", "", 1)
@@ -55,7 +104,7 @@ class ProcfileWatcherTest(TestCase):
         result.return_value = {"statuses": {}}
         plugin.call = result
         procfile = Procfile('web: gunicorn -b 0.0.0.0:8080 abyss.wsgi\n')
-        to_add, to_remove, to_change = plugin.commands(procfile)
+        plugin.commands(procfile)
         plugin.call.assert_called_with("status")
 
     def test_commands_ignore_plugin(self):
@@ -65,10 +114,8 @@ class ProcfileWatcherTest(TestCase):
         plugin = ProcfileWatcher("", "", 1)
         plugin.call = result
         procfile = Procfile('web: gunicorn -b 0.0.0.0:8080 abyss.wsgi\n')
-        to_add, to_remove, to_change = plugin.commands(procfile)
+        to_add = plugin.commands(procfile)
         self.assertEqual(set(["web"]), to_add)
-        self.assertEqual(set([]), to_remove)
-        self.assertEqual({}, to_change)
 
     def test_reload_procfile_add_new_cmds(self):
         plugin = ProcfileWatcher("", "", 1)
@@ -77,51 +124,17 @@ class ProcfileWatcherTest(TestCase):
         plugin.circus_client = Mock()
         plugin.envs = lambda: {}
         plugin.call = Mock()
-        plugin.call.return_value = {"statuses": {}}
+        plugin.call.return_value = {"statuses": {}, "status": "ok"}
         plugin.reload_procfile()
         options = self.build_options("name")
         plugin.call.assert_called_wit("add", cmd="cmd", name="name",
                                       options=options, start=True,
                                       waiting=True)
 
-    def test_reload_procfile_remove_old_cmds(self):
+    def test_should_add_cmds_with_environ(self):
         plugin = ProcfileWatcher("", "", 1)
         plugin.call = Mock()
-        plugin.cast = Mock()
-        plugin.call.return_value = {"statuses": {"name": "name", "cmd": "cmd"}}
-        plugin.procfile_path = os.path.join(os.path.dirname(__file__),
-                                            "testdata/Procfile2")
-        plugin.reload_procfile()
-        plugin.cast.assert_called_with("rm", name="name")
-
-    def test_reload_procfile_update_cmds(self):
-        plugin = ProcfileWatcher("", "", 1)
-        plugin.cast = Mock()
-        plugin.call = Mock()
-        plugin.call.return_value = {"statuses": {"name": "name", "cmd": "cmd"}}
-        plugin.get_cmd = Mock()
-        plugin.get_cmd.return_value = "cmd"
-        plugin.procfile_path = os.path.join(os.path.dirname(__file__),
-                                            "testdata/Procfile3")
-        plugin.reload_procfile()
-        plugin.get_cmd.assert_called_with("name")
-        plugin.cast.assert_called_with("set",
-                                       name="name",
-                                       options={'cmd': 'cmd2'})
-
-    def test_get_cmd(self):
-        plugin = ProcfileWatcher("", "", 1)
-        plugin.call = Mock()
-        plugin.call.return_value = {"options": {"cmd": "ble"}}
-        cmd = plugin.get_cmd("name")
-        self.assertEqual("ble", cmd)
-        plugin.call.assert_called_with("get",
-                                       name="name",
-                                       keys=["cmd"])
-
-    def test_should_replace_cmds_with_environ(self):
-        plugin = ProcfileWatcher("", "", 1)
-        plugin.call = Mock()
+        plugin.call.return_value = {"status": "ok"}
         plugin.envs = lambda: {}
         plugin.circus_client = Mock()
         name = "name"
@@ -133,9 +146,10 @@ class ProcfileWatcherTest(TestCase):
                                        options=options, start=True,
                                        waiting=True)
 
-    def test_should_replace_cmds_with_environ_upercase(self):
+    def test_should_add_cmds_with_environ_upercase(self):
         plugin = ProcfileWatcher("", "", 1)
         plugin.call = Mock()
+        plugin.call.return_value = {"status": "ok"}
         plugin.envs = lambda: {}
         plugin.circus_client = Mock()
         name = "name"
@@ -147,9 +161,10 @@ class ProcfileWatcherTest(TestCase):
                                        options=options, start=True,
                                        waiting=True)
 
-    def test_should_replace_cmds_with_environ_with_braces(self):
+    def test_should_add_cmds_with_environ_with_braces(self):
         plugin = ProcfileWatcher("", "", 1)
         plugin.call = Mock()
+        plugin.call.return_value = {"status": "ok"}
         plugin.envs = lambda: {}
         name = "name"
         cmd = "echo ${PORT}"
@@ -159,26 +174,3 @@ class ProcfileWatcherTest(TestCase):
         plugin.call.assert_called_with("add", cmd=cmd, name=name,
                                        options=options, start=True,
                                        waiting=True)
-
-    @patch("tsuru.common.load_envs")
-    def test_change_cmd_should_replace_cmds_with_environ(self, load_envs):
-        load_envs.return_value = {"BLE": "bla"}
-        plugin = ProcfileWatcher("", "", 1)
-        plugin.envs = lambda: {}
-        plugin.cast = Mock()
-        plugin.port = 8888
-        name = "name"
-        cmd = "echo ${PORT} ${port} ${BLE}"
-        plugin.change_cmd(name=name, cmd=cmd)
-        plugin.cast.assert_casted_with('set',
-                                       options={'cmd': 'echo 8888 8888 bla'},
-                                       name=name)
-
-    def test_commands_dont_remove_tsuru_hooks_watcher(self):
-        plugin = ProcfileWatcher("", "", 1)
-        result = Mock()
-        result.return_value = {"statuses": {"tsuru-hooks": ""}}
-        plugin.call = result
-        procfile = Procfile('web: gunicorn -b 0.0.0.0:8080 abyss.wsgi\n')
-        to_add, to_remove, to_change = plugin.commands(procfile)
-        self.assertNotIn("tsuru-hooks", to_remove)

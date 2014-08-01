@@ -4,6 +4,7 @@
 
 import os
 import re
+import time
 
 from socket import gethostname
 
@@ -98,12 +99,15 @@ class ApprcWatcher(CircusPlugin):
         return self.call("status")["statuses"].keys()
 
 
+class WatcherCreationError(Exception):
+    pass
+
+
 class ProcfileWatcher(CircusPlugin):
     name = "procfile_watcher"
 
     def __init__(self, *args, **config):
         super(ProcfileWatcher, self).__init__(*args, **config)
-        self.loop_rate = config.get("loop_rate", 3)  # in seconds
         self.procfile_path = config.get("app_path",
                                         "/home/application/current/Procfile")
         self.working_dir = config.get("working_dir",
@@ -116,19 +120,17 @@ class ProcfileWatcher(CircusPlugin):
                                                   "tsuru.stream.Stream")}
         self.stdout_stream = {"class": config.get("stdout_stream",
                                                   "tsuru.stream.Stream")}
-        file_watcher = FileWatcher(self.procfile_path, self.reload_procfile)
-        self.period = ioloop.PeriodicCallback(file_watcher,
-                                              self.loop_rate * 1000,
-                                              self.loop)
-
-    def get_cmd(self, name):
-        return self.call("get", name=name, keys=["cmd"])["options"]["cmd"]
 
     def handle_init(self):
-        self.period.start()
+        while True:
+            try:
+                self.reload_procfile()
+                break
+            except:
+                time.sleep(1)
 
     def handle_stop(self):
-        self.period.stop()
+        pass
 
     def handle_recv(self, data):
         pass
@@ -153,16 +155,13 @@ class ProcfileWatcher(CircusPlugin):
             "uid": self.uid,
             "gid": self.gid,
         }
-        self.call("add", cmd=cmd, name=name, options=options,
-                  start=True, waiting=True)
-
-    def remove_watcher(self, name):
-        self.cast("rm", name=name)
-
-    def change_cmd(self, name, cmd):
-        env = self.load_envs()
-        cmd = replace_args(cmd, **env)
-        self.cast("set", name=name, options={"cmd": cmd})
+        result = self.call("add", cmd=cmd, name=name, options=options,
+                           start=True, waiting=True)
+        if not result or not isinstance(result, dict):
+            raise WatcherCreationError()
+        status = result.get("status")
+        if status != "ok":
+            raise WatcherCreationError()
 
     def commands(self, procfile):
         cmds = self.call("status")["statuses"]
@@ -171,28 +170,14 @@ class ProcfileWatcher(CircusPlugin):
         cmds_names = set([k for k in cmds.keys()
                           if not k.startswith("plugin:")])
         new_cmds = set(procfile.commands.keys())
-        to_remove = cmds_names.difference(new_cmds)
-        to_add = new_cmds.difference(cmds_names)
-        to_change_names = cmds_names.intersection(new_cmds)
-        to_change = {}
-        for name in to_change_names:
-            if self.get_cmd(name) != procfile.commands.get(name):
-                to_change[name] = procfile.commands[name]
-        return to_add, to_remove, to_change
+        return new_cmds.difference(cmds_names)
 
     def reload_procfile(self):
         with open(self.procfile_path) as file:
             procfile = Procfile(file.read())
-            to_add, to_remove, to_change = self.commands(procfile)
-
-            for name in to_remove:
-                self.remove_watcher(name)
-
+            to_add = self.commands(procfile)
             for name in to_add:
                 self.add_watcher(name=name, cmd=procfile.commands[name])
-
-            for name, cmd in to_change.items():
-                self.change_cmd(name=name, cmd=procfile.commands[name])
 
 
 class StatusReporter(CircusPlugin):
