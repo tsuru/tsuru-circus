@@ -59,7 +59,7 @@ class ApprcWatcher(CircusPlugin):
 
     def __init__(self, *args, **config):
         super(ApprcWatcher, self).__init__(*args, **config)
-        self.loop_rate = config.get("loop_rate", 3)  # in seconds
+        self.loop_rate = int(config.get("loop_rate", 3))
         self.apprc = config.get("apprc", "/home/application/apprc")
         self.port = config.get("port", "8888")
         self.period = ioloop.PeriodicCallback(

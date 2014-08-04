@@ -38,6 +38,19 @@ def create_fake_call(status_return, options_return=NOPATH_OUTPUT):
 
 
 class ApprcWatcherTest(unittest.TestCase):
+    def test_init(self):
+        plugin = ApprcWatcher("", "", 1, loop_rate="10",
+                              apprc="/etc/apprc", port="8080")
+        self.assertEqual(10, plugin.loop_rate)
+        self.assertEqual("/etc/apprc", plugin.apprc)
+        self.assertEqual("8080", plugin.port)
+
+    def test_init_default_config_values(self):
+        plugin = ApprcWatcher("", "", 1)
+        self.assertEqual(3, plugin.loop_rate)
+        self.assertEqual("/home/application/apprc", plugin.apprc)
+        self.assertEqual("8888", plugin.port)
+
     def test_add_envs(self):
         plugin = ApprcWatcher("", "", 1)
         fake_call, kw = create_fake_call(None)
