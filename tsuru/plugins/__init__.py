@@ -187,7 +187,7 @@ class StatusReporter(CircusPlugin):
 
     def __init__(self, *args, **config):
         super(StatusReporter, self).__init__(*args, **config)
-        self.loop_rate = config.get("loop_rate", 60)
+        self.loop_rate = int(config.get("loop_rate", 60))
         self.apprc = config.get("apprc", "/home/application/apprc")
         self.hostname = gethostname()
         self.period = ioloop.PeriodicCallback(self.report,

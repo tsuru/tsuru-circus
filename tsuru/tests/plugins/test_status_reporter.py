@@ -15,7 +15,7 @@ class StatusReporterTestCase(unittest.TestCase):
     def test_init(self):
         hostname = socket.gethostname()
         status_reporter = StatusReporter("", "", 1,
-                                         loop_rate=180,
+                                         loop_rate="180",
                                          apprc="/etc/apprc")
         self.assertEqual(180, status_reporter.loop_rate)
         self.assertEqual("/etc/apprc", status_reporter.apprc)
