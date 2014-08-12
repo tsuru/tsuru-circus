@@ -49,3 +49,19 @@ class TestStats(TestCircus):
         client_mock.assert_called_with(host='localhost', sample_rate=1.0,
                                        prefix='tsuru.appname.somehost',
                                        port=8125)
+
+    @patch("circus.plugins.statsd.StatsdClient")
+    def test_statsd_host(self, client_mock):
+        os.environ["STATSD_HOST"] = "statsdhost"
+        os.environ["STATSD_PORT"] = "21"
+        StatsdEmitter("endpoint", "pubsub", 1.0, "ssh_server")
+        client_mock.assert_called_with(host='statsdhost', sample_rate=1.0,
+                                       prefix='tsuru.appname.somehost',
+                                       port=21)
+
+        del os.environ["STATSD_HOST"]
+        del os.environ["STATSD_PORT"]
+        StatsdEmitter("endpoint", "pubsub", 1.0, "ssh_server")
+        client_mock.assert_called_with(host='localhost', sample_rate=1.0,
+                                       prefix='tsuru.appname.somehost',
+                                       port=8125)

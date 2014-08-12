@@ -22,9 +22,11 @@ class StatsdEmitter(CircusPlugin):
 
         # initialize statsd
         from circus.plugins.statsd import StatsdClient
+        host = os.environ.get("STATSD_HOST") or config.get('host', 'localhost')
+        port = os.environ.get("STATSD_PORT") or config.get('port', '8125')
         self.statsd = StatsdClient(
-            host=config.get('host', 'localhost'),
-            port=int(config.get('port', '8125')),
+            host=host,
+            port=int(port),
             prefix=self.prefix,
             sample_rate=float(config.get('sample_rate', '1.0'))
         )
