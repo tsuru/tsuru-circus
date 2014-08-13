@@ -41,26 +41,34 @@ class TestStats(TestCircus):
 
         yield self.stop_arbiter()
 
+    @patch("tsuru.common.load_envs")
     @patch("circus.plugins.statsd.StatsdClient")
-    def test_prefix(self, client_mock):
+    def test_prefix(self, client_mock, load_envs_mock):
         os.environ["HOSTNAME"] = "somehost"
-        os.environ["TSURU_APPNAME"] = "appname"
+        load_envs_mock.return_value = {
+            "TSURU_APPNAME": "appname",
+        }
         StatsdEmitter("endpoint", "pubsub", 1.0, "ssh_server")
         client_mock.assert_called_with(host='localhost', sample_rate=1.0,
                                        prefix='tsuru.appname.somehost',
                                        port=8125)
 
+    @patch("tsuru.common.load_envs")
     @patch("circus.plugins.statsd.StatsdClient")
-    def test_statsd_host(self, client_mock):
-        os.environ["STATSD_HOST"] = "statsdhost"
-        os.environ["STATSD_PORT"] = "21"
+    def test_statsd_host(self, client_mock, load_envs_mock):
+        os.environ["HOSTNAME"] = "somehost"
+        load_envs_mock.return_value = {
+            "STATSD_HOST": "statsdhost",
+            "STATSD_PORT": "21",
+            "TSURU_APPNAME": "appname",
+        }
         StatsdEmitter("endpoint", "pubsub", 1.0, "ssh_server")
         client_mock.assert_called_with(host='statsdhost', sample_rate=1.0,
                                        prefix='tsuru.appname.somehost',
                                        port=21)
-
-        del os.environ["STATSD_HOST"]
-        del os.environ["STATSD_PORT"]
+        load_envs_mock.return_value = {
+            "TSURU_APPNAME": "appname",
+        }
         StatsdEmitter("endpoint", "pubsub", 1.0, "ssh_server")
         client_mock.assert_called_with(host='localhost', sample_rate=1.0,
                                        prefix='tsuru.appname.somehost',

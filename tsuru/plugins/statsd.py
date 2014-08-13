@@ -1,9 +1,15 @@
+# Copyright 2014 tsuru-circus authors. All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
 import os
 
 from zmq.eventloop import ioloop
 
 from circus.plugins import CircusPlugin
 from circus.util import human2bytes
+
+from tsuru import common
 
 
 class StatsdEmitter(CircusPlugin):
@@ -15,15 +21,20 @@ class StatsdEmitter(CircusPlugin):
         super(StatsdEmitter, self).__init__(endpoint, pubsub_endpoint,
                                             check_delay, ssh_server=ssh_server)
         self.app = config.get('application_name', self.default_app_name)
-        # tsuru.app.host
-        app_name = os.environ.get("TSURU_APPNAME")
+
+        apprc = "/home/application/apprc"
+        envs = common.load_envs(apprc)
+
+        app_name = envs.get("TSURU_APPNAME")
         host_name = os.environ.get("HOSTNAME")
+        # tsuru.app.host
         self.prefix = 'tsuru.{}.{}'.format(app_name, host_name)
 
         # initialize statsd
         from circus.plugins.statsd import StatsdClient
-        host = os.environ.get("STATSD_HOST") or config.get('host', 'localhost')
-        port = os.environ.get("STATSD_PORT") or config.get('port', '8125')
+        host = envs.get("STATSD_HOST") or config.get('host', 'localhost')
+        port = envs.get("STATSD_PORT") or config.get('port', '8125')
+
         self.statsd = StatsdClient(
             host=host,
             port=int(port),
