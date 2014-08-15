@@ -1,4 +1,6 @@
-import os
+# Copyright 2014 tsuru-circus authors. All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
 
 from tornado.testing import gen_test
 
@@ -41,10 +43,11 @@ class TestStats(TestCircus):
 
         yield self.stop_arbiter()
 
+    @patch("socket.gethostname")
     @patch("tsuru.common.load_envs")
     @patch("circus.plugins.statsd.StatsdClient")
-    def test_prefix(self, client_mock, load_envs_mock):
-        os.environ["HOSTNAME"] = "somehost"
+    def test_prefix(self, client_mock, load_envs_mock, gethostname_mock):
+        gethostname_mock.return_value = "somehost"
         load_envs_mock.return_value = {
             "TSURU_APPNAME": "appname",
         }
@@ -53,10 +56,11 @@ class TestStats(TestCircus):
                                        prefix='tsuru.appname.somehost',
                                        port=8125)
 
+    @patch("socket.gethostname")
     @patch("tsuru.common.load_envs")
     @patch("circus.plugins.statsd.StatsdClient")
-    def test_statsd_host(self, client_mock, load_envs_mock):
-        os.environ["HOSTNAME"] = "somehost"
+    def test_statsd_host(self, client_mock, load_envs_mock, gethostname_mock):
+        gethostname_mock.return_value = "somehost"
         load_envs_mock.return_value = {
             "STATSD_HOST": "statsdhost",
             "STATSD_PORT": "21",

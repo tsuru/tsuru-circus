@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-import os
+import socket
 
 from zmq.eventloop import ioloop
 
@@ -26,7 +26,7 @@ class StatsdEmitter(CircusPlugin):
         envs = common.load_envs(apprc)
 
         app_name = envs.get("TSURU_APPNAME")
-        host_name = os.environ.get("HOSTNAME")
+        host_name = socket.gethostname()
         # tsuru.app.host
         self.prefix = 'tsuru.{}.{}'.format(app_name, host_name)
 
