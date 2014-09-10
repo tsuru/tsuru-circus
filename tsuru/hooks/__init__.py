@@ -15,7 +15,7 @@ def load_config(**kwargs):
     for file_name in files_name:
         try:
             with open(os.path.join(watcher.working_dir, file_name)) as f:
-                return yaml.load(f.read())
+                return yaml.load(f.read()) or {}
         except IOError:
             pass
     return {}

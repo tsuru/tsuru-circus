@@ -47,6 +47,14 @@ class LoadConfTest(TestCase):
         self.assertDictEqual(config, expected)
         os.remove(yml_file)
 
+    def test_load_app_yml_empty_file(self):
+        yml_file = os.path.join(self.working_dir, "app.yaml")
+        with open(yml_file, "w") as f:
+            f.write("")
+        self.addCleanup(os.remove, yml_file)
+        config = load_config(watcher=self.watcher)
+        self.assertEqual({}, config)
+
     def test_load_without_app_files(self):
         config = load_config(watcher=self.watcher)
         expected = {}
