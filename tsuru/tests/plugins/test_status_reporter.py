@@ -60,25 +60,6 @@ class StatusReporterTestCase(unittest.TestCase):
     @mock.patch("tsuru.common.load_envs")
     @mock.patch("requests.post")
     @mock.patch("tsuru.plugins.gethostname")
-    def test_report_ignores_tsuru_hooks(self, gethostname, post, load_envs):
-        gethostname.return_value = "myhost"
-        status_reporter = StatusReporter("", "", 1)
-        load_envs.return_value = {"TSURU_HOST": "http://tsuru.io:8080",
-                                  "TSURU_APP_TOKEN": "abc123",
-                                  "TSURU_APPNAME": "something"}
-        call = mock.Mock()
-        call.return_value = {"statuses": {"tsuru-hooks": "stopped",
-                                          "something": "active"}}
-        status_reporter.call = call
-        status_reporter.report()
-        call.assert_called_once()
-        url = "http://tsuru.io:8080/apps/something/units/myhost"
-        post.assert_called_with(url, data={"status": "started"},
-                                headers={"Authorization": "bearer abc123"})
-
-    @mock.patch("tsuru.common.load_envs")
-    @mock.patch("requests.post")
-    @mock.patch("tsuru.plugins.gethostname")
     def test_report_non_active_process(self, gethostname, post, load_envs):
         gethostname.return_value = "myhost"
         status_reporter = StatusReporter("", "", 1)
