@@ -4,7 +4,6 @@
 
 import os
 import re
-import time
 
 from socket import gethostname
 
@@ -108,6 +107,7 @@ class ProcfileWatcher(CircusPlugin):
 
     def __init__(self, *args, **config):
         super(ProcfileWatcher, self).__init__(*args, **config)
+        self.loop_rate = int(config.get("loop_rate", 3))
         self.procfile_path = config.get("app_path",
                                         "/home/application/current/Procfile")
         self.working_dir = config.get("working_dir",
@@ -120,22 +120,20 @@ class ProcfileWatcher(CircusPlugin):
                                                   "tsuru.stream.Stream")}
         self.stdout_stream = {"class": config.get("stdout_stream",
                                                   "tsuru.stream.Stream")}
-        self.ran = False
+        self.period = ioloop.PeriodicCallback(
+            FileWatcher(self.apprc, self.reload_procfile),
+            self.loop_rate * 1000,
+            self.loop
+        )
 
     def handle_init(self):
-        pass
+        self.period.start()
 
     def handle_stop(self):
-        pass
+        self.period.stop()
 
     def handle_recv(self, data):
-        while not self.ran:
-            try:
-                self.reload_procfile()
-                self.ran = True
-                break
-            except:
-                time.sleep(1)
+        pass
 
     def load_envs(self):
         env = {"port": self.port, "PORT": self.port}
