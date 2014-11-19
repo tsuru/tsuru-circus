@@ -53,51 +53,6 @@ class FileWatcher(object):
                 self._callback()
 
 
-class ApprcWatcher(CircusPlugin):
-    name = "apprc_watcher"
-
-    def __init__(self, *args, **config):
-        super(ApprcWatcher, self).__init__(*args, **config)
-        self.loop_rate = int(config.get("loop_rate", 3))
-        self.apprc = config.get("apprc", "/home/application/apprc")
-        self.port = config.get("port", "8888")
-        self.period = ioloop.PeriodicCallback(
-            FileWatcher(self.apprc, self.reload_env),
-            self.loop_rate * 1000,
-            self.loop
-        )
-
-    def handle_init(self):
-        self.period.start()
-
-    def handle_stop(self):
-        self.period.stop()
-
-    def handle_recv(self, data):
-        pass
-
-    def reload_env(self):
-        envs = {"port": self.port, "PORT": self.port}
-        envs.update(common.load_envs(self.apprc))
-        for name in self.cmds():
-            if not name.startswith("plugin:"):
-                self.add_envs(name, envs)
-
-    def add_envs(self, name, envs):
-        current = self.call("options", name=name)["options"]["env"]
-        values = {}
-        values.update(os.environ, **envs)
-        if "PYTHONPATH" in values and "PYTHONPATH" not in envs:
-            del values["PYTHONPATH"]
-        if values != current:
-            self.call("stop", name=name, waiting=True)
-            self.call("set", name=name, options={"env": values})
-            self.call("start", name=name, waiting=True)
-
-    def cmds(self):
-        return self.call("status")["statuses"].keys()
-
-
 class WatcherCreationError(Exception):
     pass
 
