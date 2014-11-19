@@ -3,4 +3,4 @@ deps:
 
 test: deps
 	@python setup.py test
-	@flake8 tsuru
+	@flake8 tsuru --max-line-length 110
