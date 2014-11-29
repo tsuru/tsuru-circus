@@ -96,15 +96,16 @@ class Stats(BaseObserver):
                 if isinstance(sub_info, dict):
                     cpu = [sub_info['cpu']]
                     mem = [sub_info['mem']]
+                    inf = [human2bytes(sub_info['mem_info1'])]
 
                     for p in sub_info['children']:
                         cpu.append(p['cpu'])
                         mem.append(p['mem'])
+                        inf.append(human2bytes(p['mem_info1']))
 
                     cpus.append(sum(cpu))
                     mems.append(sum(mem))
-
-                    mem_infos.append(human2bytes(sub_info['mem_info1']))
+                    mem_infos.append(sum(inf))
                 elif sub_name == "spawn_count":
                     # spawn_count info is in the same level as processes
                     # dict infos, so if spawn_count is given, take it and
