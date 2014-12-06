@@ -11,6 +11,8 @@ from circus.util import human2bytes
 
 from tsuru import common
 
+import psutil
+
 
 class StatsdEmitter(CircusPlugin):
     name = 'statsd'
@@ -77,7 +79,13 @@ class Stats(BaseObserver):
 
     name = 'stats'
 
+    def disk_usage(self):
+        return psutil.disk_usage("/").used
+
     def look_after(self):
+
+        self.statsd.gauge("disk_usage", self.disk_usage())
+
         info = self.call("stats")
         if info["status"] == "error":
             self.statsd.increment("_stats.error")
