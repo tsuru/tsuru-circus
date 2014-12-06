@@ -9,7 +9,7 @@ from circus.tests.support import async_run_plugin
 
 from tsuru.plugins.statsd import Stats, StatsdEmitter
 
-from mock import patch, Mock
+from mock import patch
 
 
 def get_gauges(queue, plugin):
@@ -78,7 +78,6 @@ class TestStats(TestCircus):
         client_mock.assert_called_with(host='localhost', sample_rate=1.0,
                                        prefix='tsuru.appname.somehost',
                                        port=8125)
-
 
     @patch("psutil.disk_usage")
     def test_disk_usage(self, disk_usage_mock):
