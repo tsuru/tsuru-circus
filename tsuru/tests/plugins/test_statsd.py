@@ -9,7 +9,7 @@ from circus.tests.support import async_run_plugin
 
 from tsuru.plugins.statsd import Stats, StatsdEmitter
 
-from mock import patch
+from mock import patch, Mock
 
 
 def get_gauges(queue, plugin):
@@ -26,6 +26,9 @@ class TestStats(TestCircus):
 
         config = {'loop_rate': 0.2}
         stats_class = Stats
+        stats_class.disk_usage = lambda x: 0
+        stats_class.net_io = lambda x: (0, 0)
+        stats_class.connections_established = lambda x: 0
         gauges = yield async_run_plugin(
             stats_class, config,
             plugin_info_callback=get_gauges,
@@ -92,3 +95,15 @@ class TestStats(TestCircus):
         stats.net_io()
 
         net_io_mock.assert_called_with()
+
+    @patch("psutil.net_connections")
+    def test_connections_established(self, conn_mock):
+        conn = Mock(status="ESTABLISHED")
+        conn_mock.return_value = [conn, conn, conn, conn, conn]
+
+        stats = Stats("endpoint", "pubsub", 1.0, "ssh_server")
+        established = stats.connections_established()
+
+        self.assertEqual(5, established)
+
+        conn_mock.assert_called_with("tcp")

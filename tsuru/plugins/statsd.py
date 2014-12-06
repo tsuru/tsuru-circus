@@ -86,6 +86,10 @@ class Stats(BaseObserver):
         io = psutil.net_io_counters()
         return io.bytes_sent, io.bytes_recv
 
+    def connections_established(self):
+        connections = psutil.net_connections("tcp")
+        return sum([1 for conn in connections if conn.status == "ESTABLISHED"])
+
     def look_after(self):
 
         self.statsd.gauge("disk_usage", self.disk_usage())
@@ -93,6 +97,8 @@ class Stats(BaseObserver):
         net_sent, net_recv = self.net_io()
         self.statsd.gauge("net.sent", net_sent)
         self.statsd.gauge("net.recv", net_recv)
+
+        self.statsd.gauge("net.connections", self.connections_established())
 
         info = self.call("stats")
         if info["status"] == "error":
