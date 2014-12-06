@@ -82,9 +82,17 @@ class Stats(BaseObserver):
     def disk_usage(self):
         return psutil.disk_usage("/").used
 
+    def net_io(self):
+        io = psutil.net_io_counters()
+        return io.bytes_sent, io.bytes_recv
+
     def look_after(self):
 
         self.statsd.gauge("disk_usage", self.disk_usage())
+
+        net_sent, net_recv = self.net_io()
+        self.statsd.gauge("net.sent", net_sent)
+        self.statsd.gauge("net.recv", net_recv)
 
         info = self.call("stats")
         if info["status"] == "error":

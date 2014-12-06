@@ -26,7 +26,6 @@ class TestStats(TestCircus):
 
         config = {'loop_rate': 0.2}
         stats_class = Stats
-        stats_class.disk_usage = lambda x: 0
         gauges = yield async_run_plugin(
             stats_class, config,
             plugin_info_callback=get_gauges,
@@ -87,3 +86,10 @@ class TestStats(TestCircus):
         stats.disk_usage()
 
         disk_usage_mock.assert_called_with("/")
+
+    @patch("psutil.net_io_counters")
+    def test_net_io(self, net_io_mock):
+        stats = Stats("endpoint", "pubsub", 1.0, "ssh_server")
+        stats.net_io()
+
+        net_io_mock.assert_called_with()
