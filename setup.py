@@ -8,6 +8,7 @@ from tsuru import __version__
 
 setup(
     name="tsuru-circus",
+    url="https://github.com/tsuru/tsuru-circus",
     version=__version__,
     packages=find_packages(),
     description="Circus extensions for tsuru.",
