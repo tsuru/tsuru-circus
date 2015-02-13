@@ -23,7 +23,6 @@ class StatsdEmitter(CircusPlugin):
                                             check_delay, ssh_server=ssh_server)
         self.app = config.get('application_name', self.default_app_name)
 
-        apprc = "/home/application/apprc"
         envs = os.environ
 
         app_name = envs.get("TSURU_APPNAME")

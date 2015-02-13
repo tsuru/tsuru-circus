@@ -18,13 +18,11 @@ class StatusReporterTestCase(unittest.TestCase):
                                          loop_rate="180",
                                          apprc="/etc/apprc")
         self.assertEqual(180, status_reporter.loop_rate)
-        self.assertEqual("/etc/apprc", status_reporter.apprc)
         self.assertEqual(hostname, status_reporter.hostname)
 
     def test_init_default_config_values(self):
         status_reporter = StatusReporter("", "", 1)
         self.assertEqual(60, status_reporter.loop_rate)
-        self.assertEqual("/home/application/apprc", status_reporter.apprc)
 
     def test_handle_init(self):
         status_reporter = StatusReporter("", "", 1)
