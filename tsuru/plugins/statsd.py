@@ -3,13 +3,12 @@
 # license that can be found in the LICENSE file.
 
 import socket
+import os
 
 from zmq.eventloop import ioloop
 
 from circus.plugins import CircusPlugin
 from circus.util import human2bytes
-
-from tsuru import common
 
 import psutil
 
@@ -25,7 +24,7 @@ class StatsdEmitter(CircusPlugin):
         self.app = config.get('application_name', self.default_app_name)
 
         apprc = "/home/application/apprc"
-        envs = common.load_envs(apprc)
+        envs = os.environ
 
         app_name = envs.get("TSURU_APPNAME")
         host_name = socket.gethostname()

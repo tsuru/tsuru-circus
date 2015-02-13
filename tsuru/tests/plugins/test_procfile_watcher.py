@@ -4,7 +4,7 @@
 
 from unittest import TestCase
 from mock import Mock
-import os.path
+import os
 
 from tsuru.plugins import ProcfileWatcher, WatcherCreationError, FileWatcher
 
@@ -13,8 +13,10 @@ from honcho.procfile import Procfile
 
 class ProcfileWatcherTest(TestCase):
     def build_options(self, name):
+        envs = {"port": "8888", "PORT": "8888"}
+        envs.update(os.environ)
         return {
-            "env": {"port": "8888", "PORT": "8888"},
+            "env": envs,
             "copy_env": True,
             "working_dir": "/home/application/current",
             "stderr_stream": {

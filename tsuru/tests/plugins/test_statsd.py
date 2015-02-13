@@ -11,6 +11,8 @@ from tsuru.plugins.statsd import Stats, StatsdEmitter
 
 from mock import patch, Mock
 
+import os
+
 
 def get_gauges(queue, plugin):
     queue.put(plugin.statsd.gauges)
@@ -48,35 +50,38 @@ class TestStats(TestCircus):
         yield self.stop_arbiter()
 
     @patch("socket.gethostname")
-    @patch("tsuru.common.load_envs")
     @patch("circus.plugins.statsd.StatsdClient")
-    def test_prefix(self, client_mock, load_envs_mock, gethostname_mock):
+    def test_prefix(self, client_mock, gethostname_mock):
         gethostname_mock.return_value = "somehost"
-        load_envs_mock.return_value = {
+        envs = {
             "TSURU_APPNAME": "appname",
         }
+        os.environ.update(envs)
         StatsdEmitter("endpoint", "pubsub", 1.0, "ssh_server")
         client_mock.assert_called_with(host='localhost', sample_rate=1.0,
                                        prefix='tsuru.appname.somehost',
                                        port=8125)
 
     @patch("socket.gethostname")
-    @patch("tsuru.common.load_envs")
     @patch("circus.plugins.statsd.StatsdClient")
-    def test_statsd_host(self, client_mock, load_envs_mock, gethostname_mock):
+    def test_statsd_host(self, client_mock, gethostname_mock):
         gethostname_mock.return_value = "somehost"
-        load_envs_mock.return_value = {
+        envs = {
             "STATSD_HOST": "statsdhost",
             "STATSD_PORT": "21",
             "TSURU_APPNAME": "appname",
         }
+        os.environ.update(envs)
         StatsdEmitter("endpoint", "pubsub", 1.0, "ssh_server")
         client_mock.assert_called_with(host='statsdhost', sample_rate=1.0,
                                        prefix='tsuru.appname.somehost',
                                        port=21)
-        load_envs_mock.return_value = {
+        envs = {
             "TSURU_APPNAME": "appname",
+            "STATSD_HOST": "",
+            "STATSD_PORT": "",
         }
+        os.environ.update(envs)
         StatsdEmitter("endpoint", "pubsub", 1.0, "ssh_server")
         client_mock.assert_called_with(host='localhost', sample_rate=1.0,
                                        prefix='tsuru.appname.somehost',

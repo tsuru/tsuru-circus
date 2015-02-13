@@ -13,8 +13,6 @@ from circus.plugins import CircusPlugin
 from honcho.procfile import Procfile
 from zmq.eventloop import ioloop
 
-from tsuru import common
-
 
 def replace_args(data, **options):
     fmt_options = {}
@@ -92,7 +90,7 @@ class ProcfileWatcher(CircusPlugin):
 
     def load_envs(self):
         env = {"port": self.port, "PORT": self.port}
-        env.update(common.load_envs(self.apprc))
+        env.update(os.environ)
         return env
 
     def add_watcher(self, name, cmd):
@@ -163,7 +161,7 @@ class StatusReporter(CircusPlugin):
             if cmd_status != "active":
                 status = "error"
                 break
-        envs = common.load_envs(self.apprc)
+        envs = os.environ
         url_data = {"host": envs.get("TSURU_HOST"),
                     "appname": envs.get("TSURU_APPNAME"),
                     "unitname": self.hostname}

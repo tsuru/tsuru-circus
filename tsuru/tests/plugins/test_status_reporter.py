@@ -4,8 +4,8 @@
 
 import socket
 import unittest
-
 import mock
+import os
 
 from tsuru.plugins import StatusReporter
 
@@ -38,15 +38,17 @@ class StatusReporterTestCase(unittest.TestCase):
         status_reporter.handle_stop()
         status_reporter.period.stop.assert_called_once()
 
-    @mock.patch("tsuru.common.load_envs")
     @mock.patch("requests.post")
     @mock.patch("tsuru.plugins.gethostname")
-    def test_report_ignores_plugins(self, gethostname, post, load_envs):
+    def test_report_ignores_plugins(self, gethostname, post):
         gethostname.return_value = "myhost"
         status_reporter = StatusReporter("", "", 1)
-        load_envs.return_value = {"TSURU_HOST": "http://tsuru.io:8080",
-                                  "TSURU_APP_TOKEN": "abc123",
-                                  "TSURU_APPNAME": "something"}
+        envs = {
+            "TSURU_HOST": "http://tsuru.io:8080",
+            "TSURU_APP_TOKEN": "abc123",
+            "TSURU_APPNAME": "something"
+        }
+        os.environ.update(envs)
         call = mock.Mock()
         call.return_value = {"statuses": {"plugin:tsuru-hooks": "stopped",
                                           "something": "active"}}
@@ -57,15 +59,17 @@ class StatusReporterTestCase(unittest.TestCase):
         post.assert_called_with(url, data={"status": "started"},
                                 headers={"Authorization": "bearer abc123"})
 
-    @mock.patch("tsuru.common.load_envs")
     @mock.patch("requests.post")
     @mock.patch("tsuru.plugins.gethostname")
-    def test_report_non_active_process(self, gethostname, post, load_envs):
+    def test_report_non_active_process(self, gethostname, post):
         gethostname.return_value = "myhost"
         status_reporter = StatusReporter("", "", 1)
-        load_envs.return_value = {"TSURU_HOST": "http://tsuru.io:8080",
-                                  "TSURU_APP_TOKEN": "abc123",
-                                  "TSURU_APPNAME": "something"}
+        envs = {
+            "TSURU_HOST": "http://tsuru.io:8080",
+            "TSURU_APP_TOKEN": "abc123",
+            "TSURU_APPNAME": "something"
+        }
+        os.environ.update(envs)
         call = mock.Mock()
         call.return_value = {"statuses": {"otherthing": "active",
                                           "something": "active",
