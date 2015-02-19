@@ -15,7 +15,7 @@ setup(
     author="timeredbull",
     author_email="timeredbull@corp.globo.com",
     include_package_data=True,
-    install_requires=["circus>=0.11.1", "requests", "honcho==0.2.0", "PyYAML==3.10", "tsuru-unit-agent"],
+    install_requires=["circus>=0.11.1", "requests", "PyYAML==3.10", "tsuru-unit-agent"],
     tests_require=["nose", "mock"],
     test_suite="nose.collector"
 )

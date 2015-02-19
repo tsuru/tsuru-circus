@@ -1,6 +1,5 @@
 PyYAML==3.10
 flake8==2.0
-honcho==0.2.0
 mock==1.0.1
 requests==1.2.3
 circus==0.11.1
