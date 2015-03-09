@@ -15,7 +15,7 @@ setup(
     author="timeredbull",
     author_email="timeredbull@corp.globo.com",
     include_package_data=True,
-    install_requires=["circus>=0.11.1", "requests", "tsuru-unit-agent"],
+    install_requires=["circus>=0.11.1", "requests", "tsuru-unit-agent", "measures==1.1.0"],
     tests_require=["nose", "mock"],
     test_suite="nose.collector"
 )
