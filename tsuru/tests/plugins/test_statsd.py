@@ -3,19 +3,106 @@
 # license that can be found in the LICENSE file.
 
 from tornado.testing import gen_test
-
 from circus.tests.support import TestCircus, async_poll_for
-from circus.tests.support import async_run_plugin
-
+from circus.util import DEFAULT_ENDPOINT_DEALER, DEFAULT_ENDPOINT_SUB
+from circus.util import tornado_sleep
 from tsuru.plugins.statsd import Stats, StatsdEmitter
-
 from mock import patch, Mock
+import tornado
 
+from time import time
 import os
+import multiprocessing
+import functools
+
+
+class FakeBackend(object):
+
+    def __init__(self):
+        self.gauges = []
+
+    def stop(self):
+        pass
+
+    def gauge(self, key, value):
+        self.gauges.append((key, value))
+
+    def disk_usage(self, value):
+        self.gauge("disk_usage", value)
+
+    def net_sent(self, value):
+        self.gauge("net.sent", value)
+
+    def net_recv(self, value):
+        self.gauge("net.recv", value)
+
+    def net_connections(self, value):
+        self.gauge("net.connections", value)
+
+    def cpu_max(self, name, value):
+        self.gauge("{}.cpu_max".format(name), value)
+
+    def cpu_sum(self, name, value):
+        self.gauge("{}.cpu_sum".format(name), value)
+
+    def mem_max(self, name, value):
+        self.gauge("{}.mem_max".format(name), value)
+
+    def mem_sum(self, name, value):
+        self.gauge("{}.mem_sum".format(name), value)
+
+    def mem_pct_max(self, name, value):
+        self.gauge("{}.mem_pct_max".format(name), value)
+
+    def mem_pct_sum(self, name, value):
+        self.gauge("{}.mem_pct_sum".format(name), value)
+
+
+def run_plugin(cls, config, plugin_info_callback=None, duration=300,
+               endpoint=DEFAULT_ENDPOINT_DEALER, pubsub_endpoint=DEFAULT_ENDPOINT_SUB):
+    check_delay = 1
+    ssh_server = None
+
+    plugin = cls(endpoint, pubsub_endpoint, check_delay, ssh_server, **config)
+
+    if hasattr(plugin, 'storage'):
+        plugin.storage.stop()
+
+    fake_storage = FakeBackend()
+    plugin.storage = fake_storage
+
+    deadline = time() + (duration / 1000.)
+    plugin.loop.add_timeout(deadline, plugin.stop)
+
+    plugin.start()
+    try:
+        if plugin_info_callback:
+            plugin_info_callback(plugin)
+    finally:
+        plugin.stop()
+
+    return fake_storage
+
+
+@tornado.gen.coroutine
+def async_run_plugin(cls, config, plugin_info_callback, duration=300,
+                     endpoint=DEFAULT_ENDPOINT_DEALER, pubsub_endpoint=DEFAULT_ENDPOINT_SUB):
+    queue = multiprocessing.Queue()
+    plugin_info_callback = functools.partial(plugin_info_callback, queue)
+    circusctl_process = multiprocessing.Process(
+        target=run_plugin,
+        args=(cls, config, plugin_info_callback, duration, endpoint, pubsub_endpoint))
+    circusctl_process.start()
+
+    while queue.empty():
+        yield tornado_sleep(.1)
+
+    result = queue.get()
+    raise tornado.gen.Return(result)
 
 
 def get_gauges(queue, plugin):
-    queue.put(plugin.statsd.gauges)
+    queue.put(plugin.storage.gauges)
 
 
 class TestStats(TestCircus):
