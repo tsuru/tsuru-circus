@@ -5,8 +5,6 @@
 import os
 import socket
 
-from measures import Measure
-
 
 class LogstashBackend(object):
 
@@ -20,7 +18,8 @@ class LogstashBackend(object):
         host = envs.get("LOGSTASH_HOST") or 'localhost'
         port = envs.get("LOGSTASH_PORT") or '1984'
 
-        self.client = Measure("myclient", (host, int(port)))
+        from measures import Measure
+        self.client = Measure(envs.get("LOGSTASH_CLIENT", "tsuru"), (host, int(port)))
 
     def stop(self):
         pass

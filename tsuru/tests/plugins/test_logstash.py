@@ -21,6 +21,27 @@ class TestLogstash(TestCase):
         self.logstash = LogstashBackend()
         self.logstash.gauge = Mock()
 
+    @patch("measures.Measure")
+    @patch("socket.gethostname")
+    def test_logstash_environs(self, gethostname_mock, measure_mock):
+        gethostname_mock.return_value = "somehost"
+        envs = {
+            "TSURU_APPNAME": "appname",
+        }
+        os.environ.update(envs)
+        LogstashBackend()
+        measure_mock.assert_called_with('tsuru', ('localhost', 1984))
+
+        envs = {
+            "TSURU_APPNAME": "appname",
+            "LOGSTASH_HOST": "logstashhost",
+            "LOGSTASH_PORT": "123",
+            "LOGSTASH_CLIENT": "clientstash",
+        }
+        os.environ.update(envs)
+        LogstashBackend()
+        measure_mock.assert_called_with('clientstash', ('logstashhost', 123))
+
     def test_init(self):
         self.assertEqual(self.logstash.app_name, "appname")
         self.assertEqual(self.logstash.host_name, "somehost")
