@@ -7,8 +7,18 @@ from zmq.eventloop import ioloop
 from circus.plugins import CircusPlugin
 from circus.util import human2bytes
 from tsuru.plugins.stats.statsd import StatsdBackend
+from tsuru.plugins.stats.logstash import LogstashBackend
+from tsuru.plugins.stats.fake import FakeBackend
 
 import psutil
+import os
+
+
+storages = {
+    "fake": FakeBackend(),
+    "statsd": StatsdBackend(),
+    "logstash": LogstashBackend(),
+}
 
 
 class StatsdEmitter(CircusPlugin):
@@ -20,7 +30,11 @@ class StatsdEmitter(CircusPlugin):
         super(StatsdEmitter, self).__init__(endpoint, pubsub_endpoint,
                                             check_delay, ssh_server=ssh_server)
 
-        self.storage = StatsdBackend()
+        self.storage = self.get_storage()
+
+    def get_storage(self):
+        storage = os.environ.get("TSURU_METRICS_BACKEND", "statsd")
+        return storages[storage]
 
     def handle_recv(self, data):
         pass

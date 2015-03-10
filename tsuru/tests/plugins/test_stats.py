@@ -6,55 +6,17 @@ from tornado.testing import gen_test
 from circus.tests.support import TestCircus, async_poll_for
 from circus.util import DEFAULT_ENDPOINT_DEALER, DEFAULT_ENDPOINT_SUB
 from circus.util import tornado_sleep
-from tsuru.plugins.statsd import Stats
+from tsuru.plugins.statsd import Stats, storages
+from tsuru.plugins.stats.fake import FakeBackend
+from tsuru.plugins.stats.statsd import StatsdBackend
+from tsuru.plugins.stats.logstash import LogstashBackend
 from mock import patch, Mock
 import tornado
 
 from time import time
 import multiprocessing
 import functools
-
-
-class FakeBackend(object):
-
-    def __init__(self):
-        self.gauges = []
-
-    def stop(self):
-        pass
-
-    def gauge(self, key, value):
-        self.gauges.append((key, value))
-
-    def disk_usage(self, value):
-        self.gauge("disk_usage", value)
-
-    def net_sent(self, value):
-        self.gauge("net.sent", value)
-
-    def net_recv(self, value):
-        self.gauge("net.recv", value)
-
-    def net_connections(self, value):
-        self.gauge("net.connections", value)
-
-    def cpu_max(self, name, value):
-        self.gauge("{}.cpu_max".format(name), value)
-
-    def cpu_sum(self, name, value):
-        self.gauge("{}.cpu_sum".format(name), value)
-
-    def mem_max(self, name, value):
-        self.gauge("{}.mem_max".format(name), value)
-
-    def mem_sum(self, name, value):
-        self.gauge("{}.mem_sum".format(name), value)
-
-    def mem_pct_max(self, name, value):
-        self.gauge("{}.mem_pct_max".format(name), value)
-
-    def mem_pct_sum(self, name, value):
-        self.gauge("{}.mem_pct_sum".format(name), value)
+import os
 
 
 def run_plugin(cls, config, plugin_info_callback=None, duration=300,
@@ -67,9 +29,6 @@ def run_plugin(cls, config, plugin_info_callback=None, duration=300,
     if hasattr(plugin, 'storage'):
         plugin.storage.stop()
 
-    fake_storage = FakeBackend()
-    plugin.storage = fake_storage
-
     deadline = time() + (duration / 1000.)
     plugin.loop.add_timeout(deadline, plugin.stop)
 
@@ -80,7 +39,7 @@ def run_plugin(cls, config, plugin_info_callback=None, duration=300,
     finally:
         plugin.stop()
 
-    return fake_storage
+    return plugin.storage
 
 
 @tornado.gen.coroutine
@@ -108,6 +67,10 @@ class TestStats(TestCircus):
 
     @gen_test
     def test_stats(self):
+        envs = {
+            "TSURU_METRICS_BACKEND": "fake",
+        }
+        os.environ.update(envs)
         dummy_process = 'circus.tests.support.run_process'
         yield self.start_arbiter(dummy_process)
         async_poll_for(self.test_file, 'START')
@@ -160,3 +123,22 @@ class TestStats(TestCircus):
         self.assertEqual(5, established)
 
         conn_mock.assert_called_with("tcp")
+
+    def test_get_storage(self):
+        envs = {
+            "TSURU_METRICS_BACKEND": "fake",
+        }
+        os.environ.update(envs)
+        stats = Stats("endpoint", "pubsub", 1.0, "ssh_server")
+        storage = stats.get_storage()
+        self.assertIsInstance(storage, FakeBackend)
+
+    def test_statsd_default_storage(self):
+        del os.environ["TSURU_METRICS_BACKEND"]
+        stats = Stats("endpoint", "pubsub", 1.0, "ssh_server")
+        storage = stats.get_storage()
+        self.assertIsInstance(storage, StatsdBackend)
+
+    def test_logstash_registered(self):
+        self.assertIn("logstash", storages)
+        self.assertIsInstance(storages["logstash"], LogstashBackend)
