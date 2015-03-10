@@ -94,9 +94,9 @@ class TestLogstash(TestCase):
         }
         os.environ.update(envs)
         logstash = LogstashBackend()
-        logstash.measure = Mock()
+        logstash.client = Mock()
 
         logstash.gauge("key", "value")
 
         dimensions = {'app': 'appname', 'host': 'somehost', 'value': 'value'}
-        logstash.measure.count.assert_called_with('key', dimensions=dimensions)
+        logstash.client.count.assert_called_with('key', dimensions=dimensions)
