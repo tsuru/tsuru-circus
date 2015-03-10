@@ -15,9 +15,9 @@ import os
 
 
 storages = {
-    "fake": FakeBackend(),
-    "statsd": StatsdBackend(),
-    "logstash": LogstashBackend(),
+    "fake": FakeBackend,
+    "statsd": StatsdBackend,
+    "logstash": LogstashBackend,
 }
 
 
@@ -40,7 +40,7 @@ class StatsdEmitter(CircusPlugin):
         if storage not in storages:
             storage = default_backend
 
-        return storages[storage]
+        return storages[storage]()
 
     def handle_recv(self, data):
         pass

@@ -141,7 +141,7 @@ class TestStats(TestCircus):
 
     def test_logstash_registered(self):
         self.assertIn("logstash", storages)
-        self.assertIsInstance(storages["logstash"], LogstashBackend)
+        self.assertIsInstance(storages["logstash"](), LogstashBackend)
 
     def test_get_a_not_registered_backend(self):
         envs = {
