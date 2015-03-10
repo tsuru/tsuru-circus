@@ -142,3 +142,13 @@ class TestStats(TestCircus):
     def test_logstash_registered(self):
         self.assertIn("logstash", storages)
         self.assertIsInstance(storages["logstash"], LogstashBackend)
+
+    def test_get_a_not_registered_backend(self):
+        envs = {
+            "TSURU_METRICS_BACKEND": "doesnotexist",
+        }
+        os.environ.update(envs)
+        stats = Stats("endpoint", "pubsub", 1.0, "ssh_server")
+        storage = stats.get_storage()
+        # when a backend does not exists the default should be returned
+        self.assertIsInstance(storage, StatsdBackend)

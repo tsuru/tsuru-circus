@@ -33,7 +33,13 @@ class StatsdEmitter(CircusPlugin):
         self.storage = self.get_storage()
 
     def get_storage(self):
-        storage = os.environ.get("TSURU_METRICS_BACKEND", "statsd")
+        default_backend = "statsd"
+        storage = os.environ.get("TSURU_METRICS_BACKEND", default_backend)
+
+        # when a backend does not exists the default should be returned
+        if storage not in storages:
+            storage = default_backend
+
         return storages[storage]
 
     def handle_recv(self, data):
