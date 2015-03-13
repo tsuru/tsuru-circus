@@ -25,7 +25,7 @@ class LogstashBackend(object):
         pass
 
     def gauge(self, key, value):
-        dimensions = {"app": self.app_name, "host": self.host_name, "value": value}
+        dimensions = {"app": self.app_name, "host": self.host_name, "value": float(value)}
         self.client.count(key, dimensions=dimensions)
 
     def disk_usage(self, value):

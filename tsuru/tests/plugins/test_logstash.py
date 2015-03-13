@@ -96,7 +96,7 @@ class TestLogstash(TestCase):
         logstash = LogstashBackend()
         logstash.client = Mock()
 
-        logstash.gauge("key", "value")
+        logstash.gauge("key", 1)
 
-        dimensions = {'app': 'appname', 'host': 'somehost', 'value': 'value'}
+        dimensions = {'app': 'appname', 'host': 'somehost', 'value': 1.0}
         logstash.client.count.assert_called_with('key', dimensions=dimensions)
