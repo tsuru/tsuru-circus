@@ -86,6 +86,22 @@ class Stats(BaseObserver):
         connections = psutil.net_connections("tcp")
         return sum([1 for conn in connections if conn.status == "ESTABLISHED"])
 
+    def connections(self):
+        result = psutil.net_connections("tcp")
+        conns = []
+
+        for conn in result:
+            if conn.status == "ESTABLISHED" and conn.raddr[0] != "127.0.0.1":
+                ip, port = conn.raddr
+
+                if conn.laddr[1] == 8888:
+                    ip = "127.0.0.1"
+                    port = conn.laddr[1]
+
+                conns.append("{}:{}".format(ip, port))
+
+        return conns
+
     def look_after(self):
         self.storage.disk_usage(self.disk_usage())
 
@@ -94,6 +110,7 @@ class Stats(BaseObserver):
         self.storage.net_recv(net_recv)
 
         self.storage.net_connections(self.connections_established())
+        self.storage.connections(self.connections())
 
         info = self.call("stats")
         if info["status"] == "error":

@@ -40,6 +40,11 @@ class LogstashBackend(object):
     def net_connections(self, value):
         self.gauge("net_connections", value)
 
+    def connections(self, connection_list):
+        for conn in connection_list:
+            dimensions = {"app": self.app_name, "host": self.host_name, "connection": conn}
+            self.client.count("connection", dimensions=dimensions)
+
     def cpu_max(self, name, value):
         self.gauge("cpu_max", value)
 

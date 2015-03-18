@@ -80,6 +80,7 @@ class TestStats(TestCircus):
         stats_class.disk_usage = lambda x: 0
         stats_class.net_io = lambda x: (0, 0)
         stats_class.connections_established = lambda x: 0
+        stats_class.connections = lambda x: []
         gauges = yield async_run_plugin(
             stats_class, config,
             plugin_info_callback=get_gauges,

@@ -46,6 +46,9 @@ class StatsdBackend(object):
     def net_connections(self, value):
         self.gauge("net.connections", value)
 
+    def connections(self, value):
+        pass
+
     def cpu_max(self, name, value):
         self.gauge("{}.cpu_max".format(name), value)
 
