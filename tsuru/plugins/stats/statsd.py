@@ -18,10 +18,10 @@ class StatsdBackend(object):
         from circus.plugins.statsd import StatsdClient
         host = envs.get("STATSD_HOST", 'localhost') or "localhost"
         port = envs.get("STATSD_PORT", '8125') or "8125"
-        prefix = envs.get("STATSD_PREFIX", '') or ""
+        namespace = envs.get("STATSD_PREFIX", '') or ""
 
-        if not prefix:
-            statsd_prefix = "{}.".format(prefix)
+        if namespace != "":
+            statsd_prefix = "{}.".format(namespace)
         else:
             statsd_prefix = ""
 
