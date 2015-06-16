@@ -13,13 +13,20 @@ class StatsdBackend(object):
 
         app_name = envs.get("TSURU_APPNAME")
         host_name = socket.gethostname()
-        # tsuru.app.host
-        self.prefix = 'tsuru.{}.{}'.format(app_name, host_name)
-
+      
         # initialize statsd
         from circus.plugins.statsd import StatsdClient
         host = envs.get("STATSD_HOST", 'localhost') or "localhost"
         port = envs.get("STATSD_PORT", '8125') or "8125"
+        prefix = envs.get("STATSD_PREFIX", '') or ""
+
+        if not prefix:
+            statsd_prefix = "{}.".format(prefix)
+        else:
+            statsd_prefix = ""
+
+        # tsuru.app.host
+        self.prefix = '{}tsuru.{}.{}'.format(statsd_prefix, app_name, host_name)
 
         self.client = StatsdClient(
             host=host,
