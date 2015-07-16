@@ -1,3 +1,4 @@
 language: python
+sudo: false
 script:
   - make deps test
