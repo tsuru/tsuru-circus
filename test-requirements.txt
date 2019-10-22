@@ -1,5 +1,5 @@
 flake8==2.0
 mock==1.0.1
-requests==1.2.3
+requests==2.20.0
 circus==0.11.1
 measures==1.1.0
